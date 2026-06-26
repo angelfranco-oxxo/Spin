@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard SPIN BY OXXO · Plaza Oaxaca</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">S</div>
+    <div>
+      <h1>SPIN BY OXXO · Plaza Oaxaca</h1>
+      <div class="sub">Avance de Cuentas Nuevas por asesor — corte al 23 de junio 2026</div>
+    </div>
+  </div>
+  <div class="tag">Meta 10.2 / tienda</div>
+</header>
+
+<section class="kpis" id="kpis"></section>
+
+<div class="card">
+  <div class="cardtop">
+    <div>
+      <div class="tabs">
+        <button class="tab on" data-view="asesor">Por Asesor</button>
+        <button class="tab" data-view="tienda">Por Tienda</button>
+      </div>
+      <div class="hint" id="hint"></div>
+    </div>
+    <div class="tools">
+      <select class="sortby" id="asesorFilter" hidden></select>
+      <input class="search" id="buscar" type="search" placeholder="🔍 Buscar…" autocomplete="off">
+      <select class="sortby" id="orden"></select>
+    </div>
+  </div>
+  <div class="dist" id="dist"></div>
+  <div id="alist"></div>
+  <div class="empty" id="empty" hidden>Sin resultados con ese filtro.</div>
+</div>
+
+<footer>Generado desde «SPIN BY OXXO SEGUIMIENTO JUNIO.xlsx» · hoja Tiendas, filtro Plaza 10VHT Oaxaca · Meta ~10.2/tienda.</footer>
+
+<script src="data.js"></script>
+<script src="tiendas.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
