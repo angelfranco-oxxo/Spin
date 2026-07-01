@@ -85,16 +85,16 @@ header{
 }
 header::before{
   content:'';position:absolute;left:0;top:10%;bottom:10%;width:4px;border-radius:4px;
-  background:linear-gradient(180deg,#EE3831,#F6A400);
+  background:linear-gradient(180deg,#2557D6,var(--azul));
 }
 .brand{display:flex;align-items:center;gap:16px}
 
-/* Insignia OXXO: rojo con marco amarillo, forma de cápsula. */
+/* Insignia OXXO en azul SPIN, marco celeste, forma de cápsula. */
 .logo-oxxo{
   width:74px;height:44px;border-radius:11px;
-  background:#EE3831;border:3px solid #F6A400;
+  background:var(--azul);border:3px solid #6FA8DC;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 16px rgba(238,56,49,.35), inset 0 1px 0 rgba(255,255,255,.25);
+  box-shadow:0 6px 16px rgba(0,51,160,.35), inset 0 1px 0 rgba(255,255,255,.25);
 }
 .logo-oxxo span{
   color:#fff;font-weight:800;font-size:16px;letter-spacing:.5px;
@@ -111,13 +111,13 @@ h1{
 
 .btn-inicio{
   display:inline-flex;align-items:center;gap:4px;
-  border:1.5px solid #EE3831;color:#EE3831;text-decoration:none;
+  border:1.5px solid var(--azul);color:var(--azul);text-decoration:none;
   background:rgba(255,255,255,.75);
   padding:9px 20px 9px 16px;border-radius:99px;
   font-size:13px;font-weight:700;white-space:nowrap;
   transition:background .15s,box-shadow .15s;
 }
-.btn-inicio:hover{background:#fff;box-shadow:0 4px 14px rgba(238,56,49,.2)}
+.btn-inicio:hover{background:#fff;box-shadow:0 4px 14px rgba(0,51,160,.2)}
 
 /* ---------------------------------------------------------------
    KPIs — manifiesto numérico sobre una sola losa de vidrio.
