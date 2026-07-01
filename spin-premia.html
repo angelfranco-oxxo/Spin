@@ -35,14 +35,24 @@
         <button class="tab mtab" data-m="servicios">Servicios / Telefonía</button>
         <button class="tab mtab" data-m="afiliaciones">Afiliaciones</button>
       </div>
-      <div class="hint">Ranking de asesores y detalle por tienda para la métrica seleccionada. Datos en vivo desde Sheets.</div>
-    </div>
-    <div class="tools">
-      <input class="search" id="buscar" type="search" placeholder="Buscar tienda o asesor…" autocomplete="off">
+      <div class="hint">Ranking de asesores para la métrica seleccionada. Datos en vivo desde Sheets.</div>
     </div>
   </div>
 
   <div class="chart-wrap" id="chart"></div>
+
+  <div class="cardtop">
+    <div>
+      <div class="tabs">
+        <button class="tab vtab on" data-v="asesor">Por Asesor</button>
+        <button class="tab vtab" data-v="tienda">Por Tienda</button>
+      </div>
+      <div class="hint" id="hint"></div>
+    </div>
+    <div class="tools">
+      <input class="search" id="buscar" type="search" placeholder="Buscar…" autocomplete="off">
+    </div>
+  </div>
 
   <div id="alist"></div>
   <div class="empty" id="empty" hidden>Sin resultados con ese filtro.</div>

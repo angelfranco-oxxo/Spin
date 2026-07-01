@@ -57,7 +57,7 @@ function barChartSVG(items, { value, max, suffix = '%' }) {
 let ASESORES = [], TIENDAS = [];
 const $ = id => document.getElementById(id);
 const kpisEl = $('kpis'), chartEl = $('chart'), listEl = $('alist'), emptyEl = $('empty');
-const buscar = $('buscar');
+const buscar = $('buscar'), hintEl = $('hint');
 
 kpisEl.innerHTML = `<div class="kpi"><div class="lbl">Conectando con Sheets…</div></div>`;
 
@@ -72,7 +72,21 @@ const METRICAS = {
   servicios: { key: 'pctServicios', max: 60, suffix: '%' },
   afiliaciones: { key: 'conversion', max: 100, suffix: '%' },
 };
-let metrica = 'trafico', texto = '';
+// Vista de detalle: por defecto "asesor" (~10 tiles) para no volcar las 257
+// tiendas sueltas de una vez; "tienda" queda como opción explícita.
+const VISTAS = {
+  asesor: {
+    data: () => ASESORES,
+    name: a => a.asesor, sub: a => `${a.tiendas} tiendas`,
+    text: a => a.asesor.toLowerCase(), placeholder: 'Buscar asesor…',
+  },
+  tienda: {
+    data: () => TIENDAS,
+    name: t => t.tienda, sub: t => `${t.cr} · ${t.asesor}`,
+    text: t => `${t.tienda} ${t.asesor} ${t.cr}`.toLowerCase(), placeholder: 'Buscar tienda o asesor…',
+  },
+};
+let metrica = 'trafico', vista = 'asesor', texto = '';
 
 function init() {
   const tot = TIENDAS.reduce((s, t) => ({
@@ -115,6 +129,12 @@ function init() {
     metrica = tb.dataset.m;
     render();
   }));
+  document.querySelectorAll('.vtab').forEach(tb => tb.addEventListener('click', () => {
+    if (tb.dataset.v === vista) return;
+    document.querySelectorAll('.vtab').forEach(x => x.classList.toggle('on', x === tb));
+    vista = tb.dataset.v; texto = ''; buscar.value = '';
+    render();
+  }));
   buscar.addEventListener('input', () => { texto = buscar.value.trim().toLowerCase(); render(); });
 
   render();
@@ -123,22 +143,26 @@ function init() {
 function render() {
   const m = METRICAS[metrica];
   const ranked = [...ASESORES].sort((a, b) => b[m.key] - a[m.key]);
-
   chartEl.innerHTML = barChartSVG(ranked, { value: a => a[m.key], max: m.max, suffix: m.suffix });
 
-  let arr = TIENDAS.filter(t => !texto ||
-    `${t.tienda} ${t.asesor} ${t.cr}`.toLowerCase().includes(texto));
+  const v = VISTAS[vista];
+  hintEl.textContent = vista === 'asesor'
+    ? 'Un tile por asesor (promedio de sus tiendas). Cambia a "Por Tienda" para el detalle completo.'
+    : 'Detalle de las 257 tiendas de la plaza para la métrica seleccionada.';
+  buscar.placeholder = v.placeholder;
+
+  let arr = v.data().filter(d => !texto || v.text(d).includes(texto));
   arr = [...arr].sort((a, b) => b[m.key] - a[m.key]);
 
   emptyEl.hidden = arr.length > 0;
-  listEl.innerHTML = arr.map((t, i) => `
+  listEl.innerHTML = arr.map((d, i) => `
     <div class="arow${i < 3 ? ' top' + (i + 1) : ''}">
       <div class="rkn">${i + 1}</div>
-      <div><div class="anm">${t.tienda}</div><div class="ainfo">${t.cr} · ${t.asesor}</div></div>
-      <div class="gtrack"><i style="width:${Math.min(t[m.key], m.max) / m.max * 100}%;background:linear-gradient(90deg,${AZUL2},${AZUL})"></i>
+      <div><div class="anm">${v.name(d)}</div><div class="ainfo">${v.sub(d)}</div></div>
+      <div class="gtrack"><i style="width:${Math.min(d[m.key], m.max) / m.max * 100}%;background:linear-gradient(90deg,${AZUL2},${AZUL})"></i>
         ${m.key === 'avanceTrafico' ? `<span style="left:${100 / m.max * 100}%"></span>` : ''}</div>
-      <div class="aav" style="color:${AZUL}">${t[m.key].toFixed(1)}%</div>
-      <div class="acnt">${m.key === 'avanceTrafico' ? t.pctTrafico + '% / ' + t.metaTrafico + '%'
-                        : m.key === 'conversion' ? t.afiliaciones + '/' + t.registros : ''}</div>
+      <div class="aav" style="color:${AZUL}">${d[m.key].toFixed(1)}%</div>
+      <div class="acnt">${vista === 'tienda' && m.key === 'avanceTrafico' ? d.pctTrafico + '% / ' + d.metaTrafico + '%'
+                        : m.key === 'conversion' ? d.afiliaciones + '/' + d.registros : ''}</div>
     </div>`).join('');
 }
