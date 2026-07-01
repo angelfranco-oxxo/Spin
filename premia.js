@@ -54,10 +54,66 @@ function barChartSVG(items, { value, max, suffix = '%' }) {
     ${bars}${metaLine}</svg>`;
 }
 
+// ---------- dona multi-segmento (distribución) ----------
+function multiDonutSVG(segments, size = 132) {
+  const r = 50, c = 2 * Math.PI * r, cx = size / 2, cy = size / 2;
+  const total = segments.reduce((s, x) => s + x.count, 0) || 1;
+  let acc = 0;
+  const arcs = segments.filter(s => s.count > 0).map(seg => {
+    const len = c * (seg.count / total);
+    const dash = `${Math.max(len - 1.5, 0)} ${c - Math.max(len - 1.5, 0)}`;
+    const offset = -acc;
+    acc += len;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="18"
+      stroke-linecap="round" stroke-dasharray="${dash}" stroke-dashoffset="${offset}"
+      transform="rotate(-90 ${cx} ${cy})"/>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(10,10,10,.06)" stroke-width="18"/>
+    ${arcs}
+    <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-family="${FONT}" font-weight="800" font-size="26" fill="#14110E">${total}</text>
+    <text x="${cx}" y="${cy + 17}" text-anchor="middle" font-family="Barlow,sans-serif" font-size="10" fill="#6B6B6B">tiendas</text>
+  </svg>`;
+}
+
+// Buckets por métrica: Tráfico usa la meta real (100%/70%) que da la hoja;
+// Servicios y Afiliaciones no tienen meta en el Sheet, así que se dividen
+// en terciles reales de la propia distribución (dato, no un umbral inventado).
+function bucketsFor(key, values) {
+  if (key === 'avanceTrafico') {
+    return [
+      { lbl: 'Cumple meta (≥100%)', test: v => v >= 100, color: AZUL },
+      { lbl: '70–99%', test: v => v >= 70 && v < 100, color: '#7C93C4' },
+      { lbl: '< 70%', test: v => v < 70, color: '#D6331B' },
+    ];
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const q1 = sorted[Math.floor(sorted.length / 3)];
+  const q2 = sorted[Math.floor(sorted.length * 2 / 3)];
+  return [
+    { lbl: 'Tercio alto', test: v => v >= q2, color: AZUL },
+    { lbl: 'Tercio medio', test: v => v >= q1 && v < q2, color: '#7C93C4' },
+    { lbl: 'Tercio bajo', test: v => v < q1, color: '#D6331B' },
+  ];
+}
+
+function miniRowHTML(t, i, m, isTop) {
+  return `
+    <div class="mini-row">
+      <div class="mini-badge${isTop ? ' up' : ''}">${i + 1}</div>
+      <div class="mini-info">
+        <div class="mini-name">${t.tienda}</div>
+        <div class="mini-sub">${t.asesor}</div>
+      </div>
+      <div class="mini-val${isTop ? '' : ' low'}">${t[m.key].toFixed(1)}%</div>
+    </div>`;
+}
+
 let ASESORES = [], TIENDAS = [];
 const $ = id => document.getElementById(id);
 const kpisEl = $('kpis'), chartEl = $('chart'), listEl = $('alist'), emptyEl = $('empty');
 const buscar = $('buscar'), hintEl = $('hint');
+const distDonutEl = $('distDonut'), topListEl = $('topList'), bottomListEl = $('bottomList');
 
 kpisEl.innerHTML = `<div class="kpi"><div class="lbl">Conectando con Sheets…</div></div>`;
 
@@ -139,6 +195,20 @@ function render() {
   const m = METRICAS[metrica];
   const ranked = [...ASESORES].sort((a, b) => b[m.key] - a[m.key]);
   chartEl.innerHTML = barChartSVG(ranked, { value: a => a[m.key], max: m.max, suffix: m.suffix });
+
+  // Distribución de las 257 tiendas para la métrica activa.
+  const valores = TIENDAS.map(t => t[m.key]);
+  const buckets = bucketsFor(m.key, valores).map(b => ({ ...b, count: valores.filter(b.test).length }));
+  distDonutEl.innerHTML = `
+    ${multiDonutSVG(buckets)}
+    <div class="legend">${buckets.map(b => `
+      <div class="legend-row"><span class="legend-dot" style="background:${b.color}"></span>${b.lbl}<span class="legend-count" style="color:${b.color}">${b.count}</span></div>`).join('')}
+    </div>`;
+
+  // Top / bottom 3 tiendas para la métrica activa.
+  const sortedT = [...TIENDAS].sort((a, b) => b[m.key] - a[m.key]);
+  topListEl.innerHTML = sortedT.slice(0, 3).map((t, i) => miniRowHTML(t, i, m, true)).join('');
+  bottomListEl.innerHTML = sortedT.slice(-3).reverse().map((t, i) => miniRowHTML(t, i, m, false)).join('');
 
   hintEl.textContent = 'Un tile por asesor (promedio de sus tiendas). Clic en un asesor para ver el detalle de sus tiendas.';
 
