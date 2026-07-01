@@ -5,29 +5,27 @@
 
 const ESCALA = 115; // tope visual de la barra: la meta (100%) queda casi al final
 const nf = n => n.toLocaleString('es-MX');
-const color = a => a >= 100 ? '#16a34a' : a >= 70 ? '#0098C9' : a > 0 ? '#ef4444' : '#9ca3af';
-const fill = a => a >= 100
-  ? 'linear-gradient(90deg,#00C2D1,#16a34a)'
-  : a > 0 ? 'linear-gradient(90deg,#00C2D1,#0098C9)' : '#cbd5e1';
+// Color como identificador, no decoración: azul = en meta o cerca, bermellón = alerta, gris = inactivo.
+const color = a => a >= 100 ? '#0033A0' : a >= 70 ? '#3A5A9C' : a > 0 ? '#D6331B' : '#6B6B6B';
+const fill  = a => a >= 100 ? '#0033A0' : a >= 70 ? '#7C93C4' : a > 0 ? '#D6331B' : '#D8D8D8';
 
 // ---------- KPIs (totales de la plaza, fijos) ----------
 const tot = ASESORES.reduce((s, a) => ({ n: s.n + a.nuevas, m: s.m + a.meta, t: s.t + a.tiendas }), { n: 0, m: 0, t: 0 });
 const avance = tot.n / tot.m * 100;
 document.getElementById('kpis').innerHTML = `
   <div class="kpi hero">
-    <div class="lbl">★ Cuentas Nuevas · Plaza Oaxaca</div>
+    <div class="lbl">Cuentas Nuevas — Plaza Oaxaca</div>
     <div class="val">${nf(tot.n)}</div>
-    <div class="foot">Meta ${nf(tot.m)} (${(tot.m / tot.t).toFixed(1)} prom./tienda) · ${avance.toFixed(1)}% de avance</div>
+    <div class="foot">Meta ${nf(tot.m)} (${(tot.m / tot.t).toFixed(1)} prom./tienda)</div>
     <div class="bar-meta"><i style="width:${Math.min(avance, 100)}%"></i></div>
   </div>
-  <div class="kpi"><div class="lbl">% Avance Meta</div><div class="val">${avance.toFixed(0)}%</div><div class="foot">${nf(Math.max(tot.m - tot.n, 0))} restantes</div></div>
+  <div class="kpi"><div class="lbl">Avance Meta</div><div class="val">${avance.toFixed(0)}%</div><div class="foot">${nf(Math.max(tot.m - tot.n, 0))} restantes</div></div>
   <div class="kpi"><div class="lbl">Asesores</div><div class="val">${ASESORES.length}</div><div class="foot">${tot.t} tiendas</div></div>
-  <div class="kpi"><div class="lbl">Tiendas ≥ meta</div><div class="val">${TIENDAS.filter(t => t.avance >= 100).length}</div><div class="foot">de ${TIENDAS.length} tiendas</div></div>
+  <div class="kpi"><div class="lbl">Tiendas ≥ Meta</div><div class="val">${TIENDAS.filter(t => t.avance >= 100).length}</div><div class="foot">de ${TIENDAS.length} tiendas</div></div>
   <div class="kpi star">
-    <div class="star-badge">${avance.toFixed(0)}%</div>
-    <div class="lbl">★ Avance Meta Junio</div>
+    <div class="lbl">Prom. x Tienda vs Meta</div>
     <div class="val">${(tot.n / tot.t).toFixed(2)}<small class="vs"> / 10.2</small></div>
-    <div class="foot">promedio real de cuentas por tienda vs meta 10.2</div>
+    <div class="foot">promedio real de cuentas por tienda</div>
     <div class="bar-meta"><i style="width:${Math.min(tot.n / tot.t / 10.2 * 100, 100)}%"></i></div>
   </div>`;
 
@@ -56,10 +54,10 @@ const VIEWS = {
 };
 
 const buckets = [
-  { k: 'meta',  lbl: 'Cumplen meta', test: a => a.avance >= 100,                 bg: '#16a34a' },
-  { k: 'cerca', lbl: '70–99%',       test: a => a.avance >= 70 && a.avance < 100, bg: '#0098C9' },
-  { k: 'bajo',  lbl: '1–69%',        test: a => a.avance > 0 && a.avance < 70,     bg: '#ef4444' },
-  { k: 'cero',  lbl: 'Sin altas',    test: a => a.avance <= 0,                     bg: '#9ca3af' },
+  { k: 'meta',  lbl: 'Cumplen meta', test: a => a.avance >= 100,                 bg: '#0033A0' },
+  { k: 'cerca', lbl: '70–99%',       test: a => a.avance >= 70 && a.avance < 100, bg: '#7C93C4' },
+  { k: 'bajo',  lbl: '1–69%',        test: a => a.avance > 0 && a.avance < 70,     bg: '#D6331B' },
+  { k: 'cero',  lbl: 'Sin altas',    test: a => a.avance <= 0,                     bg: '#D8D8D8' },
 ];
 const marca100 = 100 / ESCALA * 100;
 
@@ -89,13 +87,13 @@ asesorFilter.addEventListener('change', () => { asesorSel = asesorFilter.value; 
 function setupView() {
   const v = VIEWS[view];
   hintEl.innerHTML = v.hint;
-  buscar.placeholder = '🔍 ' + v.placeholder;
+  buscar.placeholder = v.placeholder;
   orden.innerHTML = v.sorts.map(([k, l], i) => `<option value="${k}"${i ? '' : ' selected'}>Ordenar: ${l}</option>`).join('');
   asesorFilter.hidden = !v.useAsesorFilter;
   asesorFilter.value = '';
   distEl.classList.remove('filtering');
   distEl.innerHTML = buckets.map(b =>
-    `<div class="dchip" data-k="${b.k}" style="background:${b.bg}18;color:${b.bg}">${b.lbl}<small>${v.data.filter(b.test).length}</small></div>`).join('');
+    `<div class="dchip" data-k="${b.k}" style="--swatch:${b.bg}">${b.lbl}<small>${v.data.filter(b.test).length}</small></div>`).join('');
   distEl.querySelectorAll('.dchip').forEach(chip => chip.addEventListener('click', () => {
     filtro = filtro === chip.dataset.k ? null : chip.dataset.k;
     distEl.classList.toggle('filtering', !!filtro);
