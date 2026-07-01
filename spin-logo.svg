@@ -1,0 +1,11 @@
+<svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SPIN">
+  <!-- swoosh naranja: dos arcos + punto, geometría simple (sin letterforms a mano) -->
+  <path d="M 178 62 A 148 148 0 0 1 428 50" fill="none" stroke="#FF6A13" stroke-width="26" stroke-linecap="round"/>
+  <circle cx="445" cy="53" r="23" fill="#FF6A13"/>
+  <path d="M 198 288 A 148 148 0 0 0 448 268" fill="none" stroke="#FF6A13" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- wordmark: texto real, no curvas dibujadas a mano -->
+  <text x="300" y="245" text-anchor="middle"
+        font-family="Helvetica, Arial, sans-serif" font-weight="800" font-size="210"
+        letter-spacing="-6" fill="#0FBBD3">spin</text>
+</svg>

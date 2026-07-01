@@ -89,17 +89,7 @@ header::before{
 }
 .brand{display:flex;align-items:center;gap:16px}
 
-/* Insignia OXXO en azul SPIN, marco celeste, forma de cápsula. */
-.logo-oxxo{
-  width:74px;height:44px;border-radius:11px;
-  background:var(--azul);border:3px solid #6FA8DC;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 16px rgba(0,51,160,.35), inset 0 1px 0 rgba(255,255,255,.25);
-}
-.logo-oxxo span{
-  color:#fff;font-weight:800;font-size:16px;letter-spacing:.5px;
-  font-style:italic;
-}
+.logo-spin{height:34px;width:auto;display:block}
 
 h1{
   font-size:19px;font-weight:800;letter-spacing:-.2px;color:var(--tinta);
@@ -147,7 +137,7 @@ h1{
   font-size:38px;font-weight:700;line-height:1.05;margin-top:8px;letter-spacing:-1px;
   font-variant-numeric:tabular-nums;
 }
-.kpi.hero{background:linear-gradient(155deg,rgba(37,87,214,.14),rgba(0,180,201,.08))}
+.kpi.hero{background:linear-gradient(135deg,#FFFFFF 0%,#EAF1FC 45%,#C3D7F5 100%)}
 .kpi.hero .val{font-size:var(--display);color:var(--azul);text-shadow:0 2px 18px rgba(0,51,160,.18)}
 .kpi .vs{font-size:19px;font-weight:400;color:var(--gris)}
 .kpi .foot{font-size:11.5px;margin-top:8px;color:var(--gris)}
