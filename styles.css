@@ -108,6 +108,7 @@ h1{
   transition:background .15s,box-shadow .15s;
 }
 .btn-inicio:hover{background:#fff;box-shadow:0 4px 14px rgba(0,51,160,.2)}
+.nav-links{display:flex;gap:10px;flex-wrap:wrap}
 
 /* ---------------------------------------------------------------
    KPIs — manifiesto numérico sobre una sola losa de vidrio.

@@ -1,0 +1,14 @@
+/* Complementos de styles.css exclusivos de Avance Spin Premia. */
+
+/* KPI band de 4 columnas (esta página no tiene el KPI "meta cuentas" del otro dashboard). */
+.kpis.kpis-4{grid-template-columns:1.5fr 1fr 1fr 1fr}
+@media(max-width:1080px){.kpis.kpis-4{grid-template-columns:1fr 1fr}.kpis.kpis-4 .kpi.hero{grid-column:1/-1}}
+@media(max-width:680px){.kpis.kpis-4{grid-template-columns:1fr}}
+
+/* KPI con donut: número/etiqueta a la izquierda, aro SVG a la derecha. */
+.kpi-donut{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.kpi-donut svg{flex:none}
+
+/* Gráfico de ranking (SVG dibujado a mano en premia.js). */
+.chart-wrap{margin:8px 0 28px;overflow-x:auto}
+.chart-wrap svg{display:block}
