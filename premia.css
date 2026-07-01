@@ -25,6 +25,10 @@
   display:flex;align-items:center;justify-content:center;
   padding:24px;
 }
+/* El atributo hidden debe ganar siempre, aunque tenga la misma
+   especificidad que .modal-overlay — si no, el modal queda visible
+   de entrada y closeModal() no lo oculta. */
+.modal-overlay[hidden]{display:none}
 .modal{
   width:min(720px,100%);max-height:85vh;overflow-y:auto;
   background:linear-gradient(150deg,rgba(255,255,255,.94),rgba(240,246,255,.9));
