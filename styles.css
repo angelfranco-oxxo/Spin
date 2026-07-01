@@ -76,7 +76,7 @@ header{
   flex-wrap:wrap;gap:var(--gutter);
   padding:18px 26px 18px 30px;
   margin-bottom:32px;
-  background:linear-gradient(120deg,#FFF6EF,#FCE8E4 60%,#FBEFEE);
+  background:linear-gradient(120deg,#FFFFFF,#EAF1FC 60%,#C3D7F5);
   backdrop-filter:blur(var(--blur)) saturate(180%);
   -webkit-backdrop-filter:blur(var(--blur)) saturate(180%);
   border:1px solid var(--borde-v);
