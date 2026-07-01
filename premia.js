@@ -72,21 +72,7 @@ const METRICAS = {
   servicios: { lbl: 'Servicios / Telefonía', key: 'pctServicios', max: 60, suffix: '%' },
   afiliaciones: { lbl: 'Afiliaciones', key: 'conversion', max: 100, suffix: '%' },
 };
-// Vista de detalle: por defecto "asesor" (~10 tiles) para no volcar las 257
-// tiendas sueltas de una vez; "tienda" queda como opción explícita.
-const VISTAS = {
-  asesor: {
-    data: () => ASESORES,
-    name: a => a.asesor, sub: a => `${a.tiendas} tiendas`,
-    text: a => a.asesor.toLowerCase(), placeholder: 'Buscar asesor…',
-  },
-  tienda: {
-    data: () => TIENDAS,
-    name: t => t.tienda, sub: t => `${t.cr} · ${t.asesor}`,
-    text: t => `${t.tienda} ${t.asesor} ${t.cr}`.toLowerCase(), placeholder: 'Buscar tienda o asesor…',
-  },
-};
-let metrica = 'trafico', vista = 'asesor', texto = '';
+let metrica = 'trafico', texto = '';
 
 // Plantilla de fila, compartida entre la lista principal y el modal.
 // isAsesor: el objeto es un asesor (tile clicable, abre el modal de sus tiendas).
@@ -144,12 +130,6 @@ function init() {
     metrica = tb.dataset.m;
     render();
   }));
-  document.querySelectorAll('.vtab').forEach(tb => tb.addEventListener('click', () => {
-    if (tb.dataset.v === vista) return;
-    document.querySelectorAll('.vtab').forEach(x => x.classList.toggle('on', x === tb));
-    vista = tb.dataset.v; texto = ''; buscar.value = '';
-    render();
-  }));
   buscar.addEventListener('input', () => { texto = buscar.value.trim().toLowerCase(); render(); });
 
   render();
@@ -160,17 +140,13 @@ function render() {
   const ranked = [...ASESORES].sort((a, b) => b[m.key] - a[m.key]);
   chartEl.innerHTML = barChartSVG(ranked, { value: a => a[m.key], max: m.max, suffix: m.suffix });
 
-  const v = VISTAS[vista];
-  hintEl.textContent = vista === 'asesor'
-    ? 'Un tile por asesor (promedio de sus tiendas). Cambia a "Por Tienda" para el detalle completo.'
-    : 'Detalle de las 257 tiendas de la plaza para la métrica seleccionada.';
-  buscar.placeholder = v.placeholder;
+  hintEl.textContent = 'Un tile por asesor (promedio de sus tiendas). Clic en un asesor para ver el detalle de sus tiendas.';
 
-  let arr = v.data().filter(d => !texto || v.text(d).includes(texto));
+  let arr = ASESORES.filter(a => !texto || a.asesor.toLowerCase().includes(texto));
   arr = [...arr].sort((a, b) => b[m.key] - a[m.key]);
 
   emptyEl.hidden = arr.length > 0;
-  listEl.innerHTML = arr.map((d, i) => rowHTML(d, i, m, vista === 'asesor')).join('');
+  listEl.innerHTML = arr.map((d, i) => rowHTML(d, i, m, true)).join('');
 }
 
 // ---------- modal: tiendas de un asesor ----------
