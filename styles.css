@@ -38,7 +38,7 @@ body{
   line-height:1.45;
   background:var(--papel);
   color:var(--tinta);
-  max-width:1216px;
+  max-width:min(1680px,96vw);
   margin:0 auto;
   padding:var(--margen) var(--margen) 64px;
   position:relative;
@@ -228,15 +228,26 @@ h1{
    Filas — manifiesto tipo horario de estación, sobre vidrio.
    La regla ordena; el hover añade solo una veladura de luz.
    --------------------------------------------------------------- */
-#alist{border-top:2px solid var(--tinta)}
+/* Dos columnas: el listado se lee de arriba-abajo, izq. a der. (fila 1 y 2 arriba,
+   3 y 4 debajo…) — así se aprovecha el ancho en vez de una sola lista angosta. */
+#alist{
+  border-top:2px solid var(--tinta);
+  display:grid;grid-template-columns:1fr 1fr;
+  column-gap:36px;
+}
 .arow{
-  display:grid;grid-template-columns:30px minmax(190px,1.1fr) 3fr 60px 92px;
-  align-items:center;gap:var(--gutter);
+  display:grid;grid-template-columns:26px minmax(140px,1fr) 2fr 54px 82px;
+  align-items:center;gap:14px;
   padding:13px 10px;
   margin:0 -10px;
   border-radius:14px;
   border-bottom:1px solid var(--gris-t);
   transition:background .15s;
+}
+.arow:nth-child(odd){border-right:1px solid var(--gris-t)}
+@media(max-width:900px){
+  #alist{grid-template-columns:1fr}
+  .arow:nth-child(odd){border-right:none}
 }
 .arow:hover{background:rgba(255,255,255,.55)}
 .arow.top1,.arow.top2,.arow.top3{border-bottom-color:rgba(10,10,10,.28)}
