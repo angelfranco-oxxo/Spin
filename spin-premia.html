@@ -60,6 +60,20 @@
 
 <footer>Datos en vivo desde Google Sheets «Tableros Spin» · hoja Dashboard2 (Avance Spin Premia) · filtro Plaza 10VHT Oaxaca.</footer>
 
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div>
+        <h2 id="modalTitle" class="modal-title"></h2>
+        <div class="hint" id="modalSub"></div>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Cerrar">✕</button>
+    </div>
+    <input class="search" id="modalBuscar" type="search" placeholder="Buscar tienda…" autocomplete="off">
+    <div id="modalList" class="modal-list"></div>
+  </div>
+</div>
+
 <script src="premia-sheet.js"></script>
 <script src="premia.js"></script>
 </body>

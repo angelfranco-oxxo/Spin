@@ -68,9 +68,9 @@ loadPremiaData()
   });
 
 const METRICAS = {
-  trafico: { key: 'avanceTrafico', max: 150, suffix: '%' },
-  servicios: { key: 'pctServicios', max: 60, suffix: '%' },
-  afiliaciones: { key: 'conversion', max: 100, suffix: '%' },
+  trafico: { lbl: 'Tráfico', key: 'avanceTrafico', max: 150, suffix: '%' },
+  servicios: { lbl: 'Servicios / Telefonía', key: 'pctServicios', max: 60, suffix: '%' },
+  afiliaciones: { lbl: 'Afiliaciones', key: 'conversion', max: 100, suffix: '%' },
 };
 // Vista de detalle: por defecto "asesor" (~10 tiles) para no volcar las 257
 // tiendas sueltas de una vez; "tienda" queda como opción explícita.
@@ -87,6 +87,21 @@ const VISTAS = {
   },
 };
 let metrica = 'trafico', vista = 'asesor', texto = '';
+
+// Plantilla de fila, compartida entre la lista principal y el modal.
+// isAsesor: el objeto es un asesor (tile clicable, abre el modal de sus tiendas).
+function rowHTML(d, i, m, isAsesor) {
+  return `
+    <div class="arow${i < 3 ? ' top' + (i + 1) : ''}${isAsesor ? ' clicable' : ''}"${isAsesor ? ` data-asesor="${d.asesor.replace(/"/g, '&quot;')}"` : ''}>
+      <div class="rkn">${i + 1}</div>
+      <div><div class="anm">${isAsesor ? d.asesor : d.tienda}</div><div class="ainfo">${isAsesor ? `${d.tiendas} tiendas` : `${d.cr} · ${d.asesor}`}</div></div>
+      <div class="gtrack"><i style="width:${Math.min(d[m.key], m.max) / m.max * 100}%;background:linear-gradient(90deg,${AZUL2},${AZUL})"></i>
+        ${m.key === 'avanceTrafico' ? `<span style="left:${100 / m.max * 100}%"></span>` : ''}</div>
+      <div class="aav" style="color:${AZUL}">${d[m.key].toFixed(1)}%</div>
+      <div class="acnt">${!isAsesor && m.key === 'avanceTrafico' ? d.pctTrafico + '% / ' + d.metaTrafico + '%'
+                        : m.key === 'conversion' ? d.afiliaciones + '/' + d.registros : ''}</div>
+    </div>`;
+}
 
 function init() {
   const tot = TIENDAS.reduce((s, t) => ({
@@ -155,14 +170,42 @@ function render() {
   arr = [...arr].sort((a, b) => b[m.key] - a[m.key]);
 
   emptyEl.hidden = arr.length > 0;
-  listEl.innerHTML = arr.map((d, i) => `
-    <div class="arow${i < 3 ? ' top' + (i + 1) : ''}">
-      <div class="rkn">${i + 1}</div>
-      <div><div class="anm">${v.name(d)}</div><div class="ainfo">${v.sub(d)}</div></div>
-      <div class="gtrack"><i style="width:${Math.min(d[m.key], m.max) / m.max * 100}%;background:linear-gradient(90deg,${AZUL2},${AZUL})"></i>
-        ${m.key === 'avanceTrafico' ? `<span style="left:${100 / m.max * 100}%"></span>` : ''}</div>
-      <div class="aav" style="color:${AZUL}">${d[m.key].toFixed(1)}%</div>
-      <div class="acnt">${vista === 'tienda' && m.key === 'avanceTrafico' ? d.pctTrafico + '% / ' + d.metaTrafico + '%'
-                        : m.key === 'conversion' ? d.afiliaciones + '/' + d.registros : ''}</div>
-    </div>`).join('');
+  listEl.innerHTML = arr.map((d, i) => rowHTML(d, i, m, vista === 'asesor')).join('');
 }
+
+// ---------- modal: tiendas de un asesor ----------
+const modalOverlay = $('modalOverlay'), modalTitle = $('modalTitle'), modalSub = $('modalSub'),
+      modalClose = $('modalClose'), modalBuscar = $('modalBuscar'), modalListEl = $('modalList');
+let modalAsesor = null, modalTexto = '';
+
+function openModal(asesorNombre) {
+  modalAsesor = asesorNombre; modalTexto = ''; modalBuscar.value = '';
+  modalTitle.textContent = asesorNombre;
+  renderModal();
+  modalOverlay.hidden = false;
+  document.body.classList.add('modal-open');
+  modalBuscar.focus();
+}
+function closeModal() {
+  modalOverlay.hidden = true;
+  document.body.classList.remove('modal-open');
+}
+function renderModal() {
+  const m = METRICAS[metrica];
+  const tiendas = TIENDAS.filter(t => t.asesor === modalAsesor &&
+    (!modalTexto || `${t.tienda} ${t.cr}`.toLowerCase().includes(modalTexto)));
+  const sorted = [...tiendas].sort((a, b) => b[m.key] - a[m.key]);
+  modalSub.textContent = `${tiendas.length} tiendas · métrica: ${m.lbl}`;
+  modalListEl.innerHTML = sorted.length
+    ? sorted.map((t, i) => rowHTML(t, i, m, false)).join('')
+    : '<div class="empty">Sin tiendas con ese filtro.</div>';
+}
+
+listEl.addEventListener('click', e => {
+  const row = e.target.closest('.arow[data-asesor]');
+  if (row) openModal(row.dataset.asesor);
+});
+modalClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
+modalBuscar.addEventListener('input', () => { modalTexto = modalBuscar.value.trim().toLowerCase(); renderModal(); });
