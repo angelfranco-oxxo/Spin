@@ -7,7 +7,7 @@ const nf = n => n.toLocaleString('es-MX');
 // Color como identificador, no decoración: azul = en meta o cerca, bermellón = alerta, gris = inactivo.
 // El gradiente es solo brillo de superficie (vidrio); la familia de color no cambia.
 const color = a => a >= 100 ? '#0033A0' : a >= 70 ? '#3A5A9C' : a > 0 ? '#D6331B' : '#6B6B6B';
-const fill  = a => a >= 100 ? 'linear-gradient(90deg,#2557D6,#0033A0)'
+const fill  = a => a >= 100 ? 'linear-gradient(90deg,#00C2D1,#0033A0)'
              : a >= 70  ? 'linear-gradient(90deg,#9CB0DE,#7C93C4)'
              : a > 0    ? 'linear-gradient(90deg,#E2523A,#D6331B)'
              : '#D8D8D8';

@@ -3,7 +3,9 @@
 'use strict';
 
 const nf = n => n.toLocaleString('es-MX');
-const AZUL = '#0033A0', AZUL_CLARO = '#B9CDF0';
+const AZUL = '#0033A0', AZUL2 = '#00C2D1', AZUL_CLARO = '#B9CDF0';
+const FONT = "'Barlow Condensed',Helvetica,Arial,sans-serif";
+let gid = 0;
 
 // ---------- donut (gauge circular) ----------
 // pct: valor real (puede pasar de 100). El anillo se limita visualmente a 100%;
@@ -11,15 +13,18 @@ const AZUL = '#0033A0', AZUL_CLARO = '#B9CDF0';
 function donutSVG(pctReal, size = 108) {
   const r = 42, c = 2 * Math.PI * r, capped = Math.max(0, Math.min(pctReal, 100));
   const offset = c * (1 - capped / 100);
-  const cx = size / 2, cy = size / 2;
+  const cx = size / 2, cy = size / 2, id = 'dg' + (gid++);
   return `
   <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${AZUL2}"/><stop offset="100%" stop-color="${AZUL}"/>
+    </linearGradient></defs>
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(10,10,10,.08)" stroke-width="10"/>
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${AZUL}" stroke-width="10"
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="url(#${id})" stroke-width="10"
       stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
       transform="rotate(-90 ${cx} ${cy})"/>
-    <text x="${cx}" y="${cy + 6}" text-anchor="middle" font-family="Helvetica,Arial,sans-serif"
-      font-weight="700" font-size="22" fill="#0A0A0A">${pctReal.toFixed(0)}%</text>
+    <text x="${cx}" y="${cy + 7}" text-anchor="middle" font-family="${FONT}"
+      font-weight="800" font-size="25" fill="#14110E">${pctReal.toFixed(0)}%</text>
   </svg>`;
 }
 
@@ -28,20 +33,25 @@ function barChartSVG(items, { value, max, suffix = '%' }) {
   const labelW = 168, chartW = 360, rowH = 30, padTop = 6;
   const w = labelW + chartW + 60, h = items.length * rowH + padTop * 2;
   const metaX = max > 100 ? labelW + (100 / max) * chartW : null;
+  const gradId = 'bg' + (gid++);
   const bars = items.map((it, i) => {
     const y = padTop + i * rowH, cy = y + rowH / 2 - 6;
     const val = value(it), bw = Math.max(2, (Math.min(val, max) / max) * chartW);
     const nombre = it.asesor.length > 22 ? it.asesor.slice(0, 21) + '…' : it.asesor;
     return `
-      <text x="${labelW - 10}" y="${cy + 9}" text-anchor="end" font-family="Helvetica,Arial,sans-serif"
-        font-size="12" font-weight="700" fill="#0A0A0A">${nombre}</text>
-      <rect x="${labelW}" y="${cy}" width="${bw}" height="14" rx="7" fill="${i < 3 ? AZUL : AZUL_CLARO}"/>
-      <text x="${labelW + bw + 8}" y="${cy + 11}" font-family="Helvetica,Arial,sans-serif"
-        font-size="12" font-weight="700" fill="${AZUL}">${val.toFixed(1)}${suffix}</text>`;
+      <text x="${labelW - 10}" y="${cy + 9}" text-anchor="end" font-family="${FONT}"
+        font-size="13" font-weight="700" fill="#14110E">${nombre}</text>
+      <rect x="${labelW}" y="${cy}" width="${bw}" height="14" rx="7" fill="${i < 3 ? `url(#${gradId})` : AZUL_CLARO}"/>
+      <text x="${labelW + bw + 8}" y="${cy + 11}" font-family="${FONT}"
+        font-size="13" font-weight="700" fill="${AZUL}">${val.toFixed(1)}${suffix}</text>`;
   }).join('');
   const metaLine = metaX ? `<line x1="${metaX}" y1="${padTop - 2}" x2="${metaX}" y2="${h - padTop + 2}"
-      stroke="#0A0A0A" stroke-width="1.5" opacity=".5"/>` : '';
-  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">${bars}${metaLine}</svg>`;
+      stroke="#14110E" stroke-width="1.5" opacity=".5"/>` : '';
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">
+    <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="${AZUL2}"/><stop offset="100%" stop-color="${AZUL}"/>
+    </linearGradient></defs>
+    ${bars}${metaLine}</svg>`;
 }
 
 let ASESORES = [], TIENDAS = [];
@@ -125,7 +135,7 @@ function render() {
     <div class="arow${i < 3 ? ' top' + (i + 1) : ''}">
       <div class="rkn">${i + 1}</div>
       <div><div class="anm">${t.tienda}</div><div class="ainfo">${t.cr} · ${t.asesor}</div></div>
-      <div class="gtrack"><i style="width:${Math.min(t[m.key], m.max) / m.max * 100}%;background:${AZUL}"></i>
+      <div class="gtrack"><i style="width:${Math.min(t[m.key], m.max) / m.max * 100}%;background:linear-gradient(90deg,${AZUL2},${AZUL})"></i>
         ${m.key === 'avanceTrafico' ? `<span style="left:${100 / m.max * 100}%"></span>` : ''}</div>
       <div class="aav" style="color:${AZUL}">${t[m.key].toFixed(1)}%</div>
       <div class="acnt">${m.key === 'avanceTrafico' ? t.pctTrafico + '% / ' + t.metaTrafico + '%'
