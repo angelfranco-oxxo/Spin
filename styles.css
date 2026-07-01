@@ -1,30 +1,37 @@
 /* ============================================================
-   SPIN BY OXXO · Plaza Oaxaca — sistema Vignelli
-   Un grid. Un tipo (grotesca). Dos tamaños. Un color identificador.
-   El blanco es el protagonista; las reglas reemplazan sombras y cajas.
+   SPIN BY OXXO · Plaza Oaxaca — Vignelli + Liquid Glass
+   La disciplina no cambia: un grid, una grotesca, dos tamaños,
+   un color identificador, alineación flush-left, reglas para
+   estructura. Lo que cambia es la SUPERFICIE: los paneles flotan
+   como vidrio esmerilado sobre un fondo con luz de color difusa;
+   las reglas y la tipografía siguen dando el orden, no las cajas.
    ============================================================ */
 
 :root{
-  /* Color como identificador, no como decoración. */
   --azul:   #0033A0;   /* SPIN — azul señal. El único color identificador. */
-  --azul-t: #E3EAF7;   /* mismo azul, valor claro — "cerca de meta", no un color nuevo */
+  --azul-t: #E3EAF7;
   --alerta: #D6331B;   /* bermellón — reservado exclusivamente para "por debajo de meta" */
-  --tinta:  #0A0A0A;   /* negro tinta */
-  --gris:   #6B6B6B;   /* ink al 55% — texto secundario */
-  --gris-t: #D8D8D8;   /* ink al 20% — reglas y estados inactivos */
-  --papel:  #FFFFFF;
+  --tinta:  #0A0A0A;
+  --gris:   #6B6B6B;
+  --gris-t: rgba(10,10,10,.12);
+  --papel:  #F3F5F9;
 
-  /* Escala tipográfica: dos tamaños. Todo lo demás es peso o tracking. */
   --cuerpo: 14px;
-  --display: 56px;     /* ~4x cuerpo — contraste de escala deliberado para el número maestro */
+  --display: 56px;
 
-  /* Grid: gutter = una línea de texto. Margen exterior más ajustado que el gutter. */
   --gutter: 24px;
   --margen: 32px;
+
+  /* vidrio */
+  --vidrio:      rgba(255,255,255,.55);
+  --vidrio-alto: rgba(255,255,255,.72);
+  --borde-v:     rgba(255,255,255,.6);
+  --blur: 26px;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
 
+html,body{height:100%}
 body{
   font-family:Helvetica,Arial,"Liberation Sans","Nimbus Sans",sans-serif;
   font-size:var(--cuerpo);
@@ -34,78 +41,121 @@ body{
   max-width:1216px;
   margin:0 auto;
   padding:var(--margen) var(--margen) 64px;
+  position:relative;
+  isolation:isolate;
 }
 
 /* ---------------------------------------------------------------
-   Encabezado — flush left. La marca es una forma primaria plana.
+   Luz de fondo — manchas difusas fijas. Sin esto el vidrio no
+   tiene nada que esmerilar; con esto, translucidez real.
+   --------------------------------------------------------------- */
+.bg-glow{
+  position:fixed;inset:0;z-index:-1;overflow:hidden;
+  background:var(--papel);
+}
+.bg-glow::before,.bg-glow::after{
+  content:'';position:absolute;border-radius:50%;filter:blur(90px);
+}
+.bg-glow::before{
+  width:640px;height:640px;top:-220px;left:-160px;
+  background:radial-gradient(circle,#4C6EE0 0%,transparent 70%);
+  opacity:.35;
+}
+.bg-glow::after{
+  width:560px;height:560px;bottom:-260px;right:-140px;
+  background:radial-gradient(circle,#00B4C9 0%,transparent 70%);
+  opacity:.28;
+}
+
+/* ---------------------------------------------------------------
+   Encabezado — flush left, panel de vidrio flotante.
    --------------------------------------------------------------- */
 header{
-  display:flex;align-items:flex-end;justify-content:space-between;
+  display:flex;align-items:center;justify-content:space-between;
   flex-wrap:wrap;gap:var(--gutter);
-  padding-bottom:20px;
-  border-bottom:2pt solid var(--tinta);
-  margin-bottom:40px;
+  padding:18px 26px;
+  margin-bottom:32px;
+  background:var(--vidrio);
+  backdrop-filter:blur(var(--blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(180%);
+  border:1px solid var(--borde-v);
+  border-radius:22px;
+  box-shadow:0 8px 32px rgba(10,20,50,.08);
 }
-.brand{display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:16px}
 .logo{
-  width:48px;height:48px;
-  background:var(--azul);
-  color:#fff;font-weight:700;font-size:22px;
+  width:46px;height:46px;border-radius:13px;
+  background:linear-gradient(160deg,#2557D6,var(--azul));
+  color:#fff;font-weight:700;font-size:20px;
   display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 16px rgba(0,51,160,.4), inset 0 1px 0 rgba(255,255,255,.4);
 }
 h1{
-  font-size:22px;font-weight:700;letter-spacing:-.2px;
+  font-size:20px;font-weight:700;letter-spacing:-.2px;
   text-transform:uppercase;
 }
-.sub{
-  color:var(--gris);font-size:12px;letter-spacing:.2px;margin-top:2px;
-}
+.sub{color:var(--gris);font-size:12px;letter-spacing:.2px;margin-top:2px}
 .tag{
-  border:1px solid var(--tinta);
-  padding:7px 14px;
+  border:1px solid rgba(10,10,10,.15);
+  background:var(--vidrio-alto);
+  padding:8px 16px;border-radius:99px;
   font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
   white-space:nowrap;
 }
 
 /* ---------------------------------------------------------------
-   KPIs — manifiesto numérico. Bloques separados por reglas, no cajas.
+   KPIs — manifiesto numérico sobre una sola losa de vidrio.
+   Las reglas verticales siguen ordenando; ya no separan cajas.
    --------------------------------------------------------------- */
 .kpis{
   display:grid;
   grid-template-columns:1.9fr 1fr 1fr 1fr 1.3fr;
-  border-top:2pt solid var(--tinta);
-  border-bottom:2pt solid var(--tinta);
-  margin-bottom:48px;
+  margin-bottom:32px;
+  background:var(--vidrio);
+  backdrop-filter:blur(var(--blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(180%);
+  border:1px solid var(--borde-v);
+  border-radius:26px;
+  box-shadow:0 10px 40px rgba(10,20,50,.09);
+  overflow:hidden;
 }
 .kpi{
-  padding:20px var(--gutter) 18px 0;
-  border-left:1pt solid var(--gris-t);
-  padding-left:var(--gutter);
+  padding:24px var(--gutter) 22px;
+  border-left:1px solid var(--gris-t);
 }
-.kpi:first-child{border-left:none;padding-left:0}
+.kpi:first-child{border-left:none}
 .kpi .lbl{
   font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--gris);
 }
 .kpi .val{
-  font-size:40px;font-weight:700;line-height:1.05;margin-top:8px;letter-spacing:-1px;
+  font-size:38px;font-weight:700;line-height:1.05;margin-top:8px;letter-spacing:-1px;
   font-variant-numeric:tabular-nums;
 }
-.kpi.hero .val{font-size:var(--display);color:var(--azul)}
-.kpi .vs{font-size:20px;font-weight:400;color:var(--gris)}
+.kpi.hero{background:linear-gradient(155deg,rgba(37,87,214,.14),rgba(0,180,201,.08))}
+.kpi.hero .val{font-size:var(--display);color:var(--azul);text-shadow:0 2px 18px rgba(0,51,160,.18)}
+.kpi .vs{font-size:19px;font-weight:400;color:var(--gris)}
 .kpi .foot{font-size:11.5px;margin-top:8px;color:var(--gris)}
 .kpi.hero .foot{color:var(--tinta)}
 .kpi.star .val{color:var(--azul)}
 
-.bar-meta{height:3pt;background:var(--gris-t);margin-top:12px}
-.bar-meta>i{display:block;height:100%;background:var(--azul)}
+.bar-meta{height:5px;border-radius:99px;background:rgba(10,10,10,.08);margin-top:12px;overflow:hidden}
+.bar-meta>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2557D6,var(--azul))}
 
-@media(max-width:1080px){.kpis{grid-template-columns:1fr 1fr 1fr}.kpi.hero{grid-column:1/-1;border-left:none;padding-left:0}}
+@media(max-width:1080px){.kpis{grid-template-columns:1fr 1fr 1fr}.kpi.hero{grid-column:1/-1;border-left:none}}
 @media(max-width:680px){.kpis{grid-template-columns:1fr 1fr}}
 
 /* ---------------------------------------------------------------
-   Sección de listado
+   Sección de listado — segunda losa de vidrio.
    --------------------------------------------------------------- */
-.card{padding:0}
+.card{
+  padding:26px 28px 12px;
+  background:var(--vidrio);
+  backdrop-filter:blur(var(--blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(180%);
+  border:1px solid var(--borde-v);
+  border-radius:26px;
+  box-shadow:0 10px 40px rgba(10,20,50,.09);
+}
 .card h2{
   font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--gris);
   margin-bottom:6px;
@@ -116,60 +166,74 @@ h1{
   margin-bottom:20px;
 }
 
-/* Tabs: texto flush-left, subrayado de 2pt indica el estado activo. Sin cápsula. */
-.tabs{display:flex;gap:28px;margin-bottom:10px}
+/* Tabs: subrayado de 2pt marca el estado activo; nunca una cápsula sólida. */
+.tabs{display:flex;gap:26px;margin-bottom:10px}
 .tab{
   border:0;background:none;cursor:pointer;font-family:inherit;
   font-size:13px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;
   color:var(--gris);
   padding:0 0 10px;
-  border-bottom:2pt solid transparent;
+  border-bottom:2px solid transparent;
+  transition:color .15s,border-color .15s;
 }
 .tab.on{color:var(--tinta);border-bottom-color:var(--azul)}
 
-.tools{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .search,.sortby{
-  padding:8px 4px;border:none;border-bottom:1pt solid var(--tinta);
-  font-size:13px;outline:none;background:transparent;color:var(--tinta);font-family:inherit;
+  padding:9px 14px;border:1px solid rgba(10,10,10,.14);border-radius:12px;
+  font-size:13px;outline:none;color:var(--tinta);font-family:inherit;
+  background:rgba(255,255,255,.55);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:border-color .15s,box-shadow .15s;
 }
 .search{min-width:190px}
 .search::placeholder{color:var(--gris)}
-.search:focus,.sortby:focus{border-bottom:2pt solid var(--azul)}
+.search:focus,.sortby:focus{
+  border-color:var(--azul);
+  box-shadow:0 0 0 3px rgba(0,51,160,.14);
+}
 .sortby{cursor:pointer}
 
 /* ---------------------------------------------------------------
-   Distribución / filtros — leyenda flush-left, cuadro = forma primaria
+   Distribución / filtros — leyenda flush-left; el color sigue
+   siendo únicamente un identificador, ahora en una píldora de vidrio.
    --------------------------------------------------------------- */
-.dist{display:flex;gap:32px;flex-wrap:wrap;margin-bottom:28px}
+.dist{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px}
 .dchip{
-  display:flex;align-items:baseline;gap:9px;
+  display:flex;align-items:center;gap:8px;
   font-size:12px;font-weight:700;letter-spacing:.2px;
   cursor:pointer;user-select:none;color:var(--tinta);
-  border-bottom:2pt solid transparent;
-  padding-bottom:4px;
-  background:none !important; /* anula estilo inline heredado de app.js */
+  padding:7px 14px 7px 10px;border-radius:99px;
+  border:1px solid rgba(10,10,10,.1);
+  background:rgba(255,255,255,.45) !important; /* anula estilo inline heredado de app.js */
+  transition:border-color .15s,background .15s,opacity .15s;
 }
 .dchip::before{
-  content:'';width:11px;height:11px;flex:none;
+  content:'';width:9px;height:9px;border-radius:50%;flex:none;
   background:var(--swatch,var(--gris));
-  display:inline-block;
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--swatch,var(--gris)) 20%, transparent);
 }
-.dchip small{font-size:15px;font-weight:700;color:inherit}
-.dchip.on{border-bottom-color:var(--swatch)}
-.dist.filtering .dchip:not(.on){color:var(--gris);opacity:.5}
+.dchip small{font-size:14px;font-weight:700;color:inherit}
+.dchip.on{border-color:var(--swatch);background:rgba(255,255,255,.75) !important}
+.dist.filtering .dchip:not(.on){color:var(--gris);opacity:.45}
 .empty{color:var(--gris);font-size:13px;padding:32px 0;border-top:1pt solid var(--gris-t)}
 
 /* ---------------------------------------------------------------
-   Filas — manifiesto tipo horario de estación. Regla, no tarjeta.
+   Filas — manifiesto tipo horario de estación, sobre vidrio.
+   La regla ordena; el hover añade solo una veladura de luz.
    --------------------------------------------------------------- */
-#alist{border-top:2pt solid var(--tinta)}
+#alist{border-top:2px solid var(--tinta)}
 .arow{
   display:grid;grid-template-columns:30px minmax(190px,1.1fr) 3fr 60px 92px;
   align-items:center;gap:var(--gutter);
-  padding:12px 0;
-  border-bottom:1pt solid var(--gris-t);
+  padding:13px 10px;
+  margin:0 -10px;
+  border-radius:14px;
+  border-bottom:1px solid var(--gris-t);
+  transition:background .15s;
 }
-.arow.top1,.arow.top2,.arow.top3{border-bottom-color:var(--tinta)}
+.arow:hover{background:rgba(255,255,255,.55)}
+.arow.top1,.arow.top2,.arow.top3{border-bottom-color:rgba(10,10,10,.28)}
 .arow .rkn{
   font-weight:700;font-size:13px;color:var(--gris);text-align:right;
   font-variant-numeric:tabular-nums;
@@ -179,24 +243,25 @@ h1{
 .arow .ainfo{font-size:11.5px;color:var(--gris);margin-top:1px}
 
 .gtrack{
-  background:var(--gris-t);height:10px;position:relative;
+  background:rgba(10,10,10,.08);height:11px;border-radius:99px;position:relative;overflow:hidden;
 }
-.gtrack>i{display:block;height:100%}
+.gtrack>i{
+  display:block;height:100%;border-radius:99px;position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+}
 .gtrack>span{
-  position:absolute;top:-4px;height:18px;width:1pt;background:var(--tinta);
+  position:absolute;top:-4px;height:19px;width:2px;border-radius:1px;
+  background:var(--tinta);opacity:.55;
 }
 .arow.top1 .gtrack>span::after{
   content:'META';position:absolute;top:-16px;left:50%;transform:translateX(-50%);
   font-size:8.5px;font-weight:700;letter-spacing:.4px;color:var(--gris);
 }
-.aav{
-  text-align:right;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;
-}
+.aav{text-align:right;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
 .acnt{text-align:right;font-size:12px;color:var(--gris);font-variant-numeric:tabular-nums}
 
 footer{
-  color:var(--gris);font-size:11px;margin-top:48px;padding-top:16px;
-  border-top:1pt solid var(--gris-t);
+  color:var(--gris);font-size:11px;margin-top:32px;padding:0 4px;
 }
 
 @media(max-width:560px){
