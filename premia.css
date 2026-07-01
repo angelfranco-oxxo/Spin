@@ -79,3 +79,14 @@
 .modal-list{display:flex;flex-direction:column;gap:10px}
 .modal-list .arow{grid-template-columns:30px minmax(120px,1fr) 2fr 54px 82px}
 body.modal-open{overflow:hidden}
+
+/* ---------- tooltip flotante para las gráficas SVG ---------- */
+.chart-tip{
+  position:fixed;z-index:300;pointer-events:none;
+  transform:translate(-50%,calc(-100% - 12px));
+  background:rgba(20,17,14,.94);color:#fff;
+  padding:8px 12px;border-radius:10px;
+  font-family:var(--font-body);font-size:12px;font-weight:600;line-height:1.5;
+  white-space:pre-line;max-width:220px;
+  box-shadow:0 10px 26px rgba(0,0,0,.28);
+}

@@ -10,7 +10,7 @@ let gid = 0;
 // ---------- donut (gauge circular) ----------
 // pct: valor real (puede pasar de 100). El anillo se limita visualmente a 100%;
 // el número en el centro siempre muestra el valor real.
-function donutSVG(pctReal, size = 108) {
+function donutSVG(pctReal, size = 108, tip = '') {
   const r = 42, c = 2 * Math.PI * r, capped = Math.max(0, Math.min(pctReal, 100));
   const offset = c * (1 - capped / 100);
   const cx = size / 2, cy = size / 2, id = 'dg' + (gid++);
@@ -22,7 +22,7 @@ function donutSVG(pctReal, size = 108) {
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(10,10,10,.08)" stroke-width="10"/>
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="url(#${id})" stroke-width="10"
       stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
-      transform="rotate(-90 ${cx} ${cy})"/>
+      transform="rotate(-90 ${cx} ${cy})"${tip ? ` data-tip="${tip.replace(/"/g, '&quot;')}"` : ''} style="cursor:default"/>
     <text x="${cx}" y="${cy + 7}" text-anchor="middle" font-family="${FONT}"
       font-weight="800" font-size="25" fill="#14110E">${pctReal.toFixed(0)}%</text>
   </svg>`;
@@ -42,12 +42,15 @@ function barChartSVG(items, { value, max, suffix = '%' }) {
     const val = value(it), bh = Math.max(3, (Math.min(val, max) / max) * chartH);
     const x = sideGap + i * colW + (colW - barW) / 2, cx = x + barW / 2, y = baseY - bh;
     const nombre = it.asesor.split(' ')[0]; // solo el nombre de pila: cabe sin encimarse entre columnas
+    const tip = `${it.asesor}\n${val.toFixed(1)}${suffix} · ${it.tiendas} tiendas`.replace(/"/g, '&quot;');
     return `
-      <rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="9" fill="${i < 3 ? `url(#${gradId})` : AZUL_CLARO}"/>
+      <rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="9"
+        fill="${i < 3 ? `url(#${gradId})` : AZUL_CLARO}" data-tip="${tip}" style="cursor:pointer"/>
       <text x="${cx}" y="${y - 9}" text-anchor="middle" font-family="${FONT}"
-        font-size="12.5" font-weight="700" fill="${AZUL}">${val.toFixed(1)}${suffix}</text>
+        font-size="12.5" font-weight="700" fill="${AZUL}" style="pointer-events:none">${val.toFixed(1)}${suffix}</text>
       <text x="${cx - 4}" y="${baseY + 15}" text-anchor="end" font-family="${FONT}"
-        font-size="12.5" font-weight="700" fill="#14110E" transform="rotate(-30 ${cx - 4} ${baseY + 15})">${nombre}</text>`;
+        font-size="12.5" font-weight="700" fill="#14110E" style="pointer-events:none"
+        transform="rotate(-30 ${cx - 4} ${baseY + 15})">${nombre}</text>`;
   }).join('');
 
   const metaLine = metaY != null
@@ -77,9 +80,10 @@ function multiDonutSVG(segments, size = 132) {
     const dash = `${Math.max(len - 1.5, 0)} ${c - Math.max(len - 1.5, 0)}`;
     const offset = -acc;
     acc += len;
+    const tip = `${seg.lbl}\n${seg.count} tiendas · ${(seg.count / total * 100).toFixed(0)}% del total`;
     return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="18"
       stroke-linecap="round" stroke-dasharray="${dash}" stroke-dashoffset="${offset}"
-      transform="rotate(-90 ${cx} ${cy})"/>`;
+      transform="rotate(-90 ${cx} ${cy})" data-tip="${tip}" style="cursor:pointer"/>`;
   }).join('');
   return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(10,10,10,.06)" stroke-width="18"/>
@@ -128,6 +132,25 @@ const kpisEl = $('kpis'), chartEl = $('chart'), listEl = $('alist'), emptyEl = $
 const buscar = $('buscar'), hintEl = $('hint');
 const distDonutEl = $('distDonut'), topListEl = $('topList'), bottomListEl = $('bottomList');
 
+// ---------- tooltip flotante, reusado por todas las gráficas SVG ----------
+// Cualquier elemento con [data-tip] muestra su contenido al pasar el cursor.
+const chartTip = $('chartTip');
+function bindTooltips(root) {
+  root.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mouseenter', e => {
+      chartTip.textContent = el.dataset.tip;
+      chartTip.hidden = false;
+      moveTip(e);
+    });
+    el.addEventListener('mousemove', moveTip);
+    el.addEventListener('mouseleave', () => { chartTip.hidden = true; });
+  });
+}
+function moveTip(e) {
+  chartTip.style.left = e.clientX + 'px';
+  chartTip.style.top = e.clientY + 'px';
+}
+
 kpisEl.innerHTML = `<div class="kpi"><div class="lbl">Conectando con Sheets…</div></div>`;
 
 loadPremiaData()
@@ -173,14 +196,14 @@ function init() {
         <div class="lbl">Tráfico — Avance Meta</div>
         <div class="foot">Promedio de la plaza vs. la meta de Tráfico (100%)</div>
       </div>
-      ${donutSVG(avgAvanceTraf)}
+      ${donutSVG(avgAvanceTraf, 108, `Avance Meta Tráfico\n${avgAvanceTraf.toFixed(1)}% promedio de ${n} tiendas`)}
     </div>
     <div class="kpi kpi-donut">
       <div>
         <div class="lbl">Afiliaciones — Conversión</div>
         <div class="foot">${nf(tot.afil)} de ${nf(tot.reg)} registros</div>
       </div>
-      ${donutSVG(conversion)}
+      ${donutSVG(conversion, 108, `Conversión de Afiliaciones\n${nf(tot.afil)} afiliaciones de ${nf(tot.reg)} registros`)}
     </div>
     <div class="kpi">
       <div class="lbl">Servicios / Telefonía</div>
@@ -192,6 +215,7 @@ function init() {
       <div class="val">${ASESORES.length}<small class="vs"> asesores</small></div>
       <div class="foot">${n} tiendas · Plaza Oaxaca</div>
     </div>`;
+  bindTooltips(kpisEl);
 
   document.querySelectorAll('.mtab').forEach(tb => tb.addEventListener('click', () => {
     if (tb.dataset.m === metrica) return;
@@ -208,6 +232,7 @@ function render() {
   const m = METRICAS[metrica];
   const ranked = [...ASESORES].sort((a, b) => b[m.key] - a[m.key]);
   chartEl.innerHTML = barChartSVG(ranked, { value: a => a[m.key], max: m.max, suffix: m.suffix });
+  bindTooltips(chartEl);
 
   // Distribución de las 257 tiendas para la métrica activa.
   const valores = TIENDAS.map(t => t[m.key]);
@@ -217,6 +242,7 @@ function render() {
     <div class="legend">${buckets.map(b => `
       <div class="legend-row"><span class="legend-dot" style="background:${b.color}"></span>${b.lbl}<span class="legend-count" style="color:${b.color}">${b.count}</span></div>`).join('')}
     </div>`;
+  bindTooltips(distDonutEl);
 
   // Top / bottom 3 tiendas para la métrica activa.
   const sortedT = [...TIENDAS].sort((a, b) => b[m.key] - a[m.key]);
