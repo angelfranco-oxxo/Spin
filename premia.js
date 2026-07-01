@@ -28,30 +28,43 @@ function donutSVG(pctReal, size = 108) {
   </svg>`;
 }
 
-// ---------- ranking horizontal (barra por asesor) ----------
+// ---------- ranking vertical (columna por asesor) ----------
 function barChartSVG(items, { value, max, suffix = '%' }) {
-  const labelW = 168, chartW = 360, rowH = 30, padTop = 6;
-  const w = labelW + chartW + 60, h = items.length * rowH + padTop * 2;
-  const metaX = max > 100 ? labelW + (100 / max) * chartW : null;
+  const n = items.length;
+  const colW = 84, barW = 38;           // gap real entre barras = colW - barW = 46px
+  const chartH = 210, padTop = 30, labelH = 56, sideGap = 24;
+  const w = n * colW + sideGap * 2, h = padTop + chartH + labelH;
   const gradId = 'bg' + (gid++);
+  const metaY = max > 100 ? padTop + chartH * (1 - 100 / max) : null;
+  const baseY = padTop + chartH;
+
   const bars = items.map((it, i) => {
-    const y = padTop + i * rowH, cy = y + rowH / 2 - 6;
-    const val = value(it), bw = Math.max(2, (Math.min(val, max) / max) * chartW);
-    const nombre = it.asesor.length > 22 ? it.asesor.slice(0, 21) + '…' : it.asesor;
+    const val = value(it), bh = Math.max(3, (Math.min(val, max) / max) * chartH);
+    const x = sideGap + i * colW + (colW - barW) / 2, cx = x + barW / 2, y = baseY - bh;
+    const nombre = it.asesor.split(' ')[0]; // solo el nombre de pila: cabe sin encimarse entre columnas
     return `
-      <text x="${labelW - 10}" y="${cy + 9}" text-anchor="end" font-family="${FONT}"
-        font-size="13" font-weight="700" fill="#14110E">${nombre}</text>
-      <rect x="${labelW}" y="${cy}" width="${bw}" height="14" rx="7" fill="${i < 3 ? `url(#${gradId})` : AZUL_CLARO}"/>
-      <text x="${labelW + bw + 8}" y="${cy + 11}" font-family="${FONT}"
-        font-size="13" font-weight="700" fill="${AZUL}">${val.toFixed(1)}${suffix}</text>`;
+      <rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="9" fill="${i < 3 ? `url(#${gradId})` : AZUL_CLARO}"/>
+      <text x="${cx}" y="${y - 9}" text-anchor="middle" font-family="${FONT}"
+        font-size="12.5" font-weight="700" fill="${AZUL}">${val.toFixed(1)}${suffix}</text>
+      <text x="${cx - 4}" y="${baseY + 15}" text-anchor="end" font-family="${FONT}"
+        font-size="12.5" font-weight="700" fill="#14110E" transform="rotate(-30 ${cx - 4} ${baseY + 15})">${nombre}</text>`;
   }).join('');
-  const metaLine = metaX ? `<line x1="${metaX}" y1="${padTop - 2}" x2="${metaX}" y2="${h - padTop + 2}"
-      stroke="#14110E" stroke-width="1.5" opacity=".5"/>` : '';
+
+  const metaLine = metaY != null
+    ? `<line x1="${sideGap - 10}" y1="${metaY}" x2="${w - sideGap + 10}" y2="${metaY}"
+        stroke="#14110E" stroke-width="1.3" stroke-dasharray="4 4" opacity=".45"/>
+       <text x="${w - sideGap + 10}" y="${metaY - 6}" text-anchor="end" font-family="${FONT}"
+        font-size="10" font-weight="700" fill="#6B6B6B">META</text>`
+    : '';
+
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">
-    <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="${AZUL2}"/><stop offset="100%" stop-color="${AZUL}"/>
+    <defs><linearGradient id="${gradId}" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="${AZUL}"/><stop offset="100%" stop-color="${AZUL2}"/>
     </linearGradient></defs>
-    ${bars}${metaLine}</svg>`;
+    <line x1="${sideGap - 10}" y1="${baseY}" x2="${w - sideGap + 10}" y2="${baseY}" stroke="rgba(10,10,10,.12)" stroke-width="1"/>
+    ${metaLine}
+    ${bars}
+  </svg>`;
 }
 
 // ---------- dona multi-segmento (distribución) ----------
