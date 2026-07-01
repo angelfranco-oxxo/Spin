@@ -1,6 +1,5 @@
 // Dashboard SPIN BY OXXO · Plaza Oaxaca
-// Datos: data.js (ASESORES) y tiendas.js (TIENDAS).
-// Avance = Cuentas nuevas ÷ Meta (columnas de la hoja Tiendas). Meta ~10.2/tienda.
+// Datos en vivo desde Google Sheets (ver sheet.js). Avance = Cuentas nuevas ÷ Meta.
 'use strict';
 
 const ESCALA = 115; // tope visual de la barra: la meta (100%) queda casi al final
@@ -13,50 +12,6 @@ const fill  = a => a >= 100 ? 'linear-gradient(90deg,#2557D6,#0033A0)'
              : a > 0    ? 'linear-gradient(90deg,#E2523A,#D6331B)'
              : '#D8D8D8';
 
-// ---------- KPIs (totales de la plaza, fijos) ----------
-const tot = ASESORES.reduce((s, a) => ({ n: s.n + a.nuevas, m: s.m + a.meta, t: s.t + a.tiendas }), { n: 0, m: 0, t: 0 });
-const avance = tot.n / tot.m * 100;
-document.getElementById('kpis').innerHTML = `
-  <div class="kpi hero">
-    <div class="lbl">Cuentas Nuevas — Plaza Oaxaca</div>
-    <div class="val">${nf(tot.n)}</div>
-    <div class="foot">Meta ${nf(tot.m)} (${(tot.m / tot.t).toFixed(1)} prom./tienda)</div>
-    <div class="bar-meta"><i style="width:${Math.min(avance, 100)}%"></i></div>
-  </div>
-  <div class="kpi"><div class="lbl">Avance Meta</div><div class="val">${avance.toFixed(0)}%</div><div class="foot">${nf(Math.max(tot.m - tot.n, 0))} restantes</div></div>
-  <div class="kpi"><div class="lbl">Asesores</div><div class="val">${ASESORES.length}</div><div class="foot">${tot.t} tiendas</div></div>
-  <div class="kpi"><div class="lbl">Tiendas ≥ Meta</div><div class="val">${TIENDAS.filter(t => t.avance >= 100).length}</div><div class="foot">de ${TIENDAS.length} tiendas</div></div>
-  <div class="kpi star">
-    <div class="lbl">Prom. x Tienda vs Meta</div>
-    <div class="val">${(tot.n / tot.t).toFixed(2)}<small class="vs"> / 10.2</small></div>
-    <div class="foot">promedio real de cuentas por tienda</div>
-    <div class="bar-meta"><i style="width:${Math.min(tot.n / tot.t / 10.2 * 100, 100)}%"></i></div>
-  </div>`;
-
-// ---------- configuración por vista ----------
-const VIEWS = {
-  asesor: {
-    data: ASESORES,
-    hint: 'Columnas de la hoja Tiendas: <b>Cuentas nuevas</b> ÷ <b>Meta</b> = <b>% Cum vs Meta</b> (~10.2 prom./tienda). La marca oscura es el 100% de la meta.',
-    placeholder: 'Buscar asesor…',
-    sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['tiendas', 'Nº de tiendas'], ['nombre', 'Nombre A–Z']],
-    name: a => a.asesor,
-    sub: a => `${a.tiendas} tiendas · meta ${a.meta}`,
-    text: t => t.toLowerCase(),
-    useAsesorFilter: false,
-  },
-  tienda: {
-    data: TIENDAS,
-    hint: 'Avance de cada <b>tienda</b>: Cuentas nuevas ÷ Meta. Usa el filtro para ver solo las tiendas de un asesor. La marca oscura es el 100% de la meta.',
-    placeholder: 'Buscar tienda…',
-    sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['nombre', 'Tienda A–Z']],
-    name: t => t.tienda,
-    sub: t => `${t.cr} · ${t.asesor} · meta ${t.meta}`,
-    text: t => `${t.tienda} ${t.asesor} ${t.cr}`.toLowerCase(),
-    useAsesorFilter: true,
-  },
-};
-
 const buckets = [
   { k: 'meta',  lbl: 'Cumplen meta', test: a => a.avance >= 100,                 bg: '#0033A0' },
   { k: 'cerca', lbl: '70–99%',       test: a => a.avance >= 70 && a.avance < 100, bg: '#7C93C4' },
@@ -64,29 +19,81 @@ const buckets = [
   { k: 'cero',  lbl: 'Sin altas',    test: a => a.avance <= 0,                     bg: '#D8D8D8' },
 ];
 const marca100 = 100 / ESCALA * 100;
+const $ = id => document.getElementById(id);
+const kpisEl = $('kpis'), distEl = $('dist'), listEl = $('alist'), emptyEl = $('empty');
+const buscar = $('buscar'), orden = $('orden'), hintEl = $('hint'), asesorFilter = $('asesorFilter');
 
-// ---------- estado ----------
+let ASESORES = [], TIENDAS = [], VIEWS = {};
 let view = 'asesor', filtro = null, texto = '', sortKey = 'avance', asesorSel = '';
 
-const $ = id => document.getElementById(id);
-const distEl = $('dist'), listEl = $('alist'), emptyEl = $('empty');
-const buscar = $('buscar'), orden = $('orden'), hintEl = $('hint');
-const asesorFilter = $('asesorFilter');
+kpisEl.innerHTML = `<div class="kpi"><div class="lbl">Conectando con Sheets…</div></div>`;
 
-// opciones del filtro por asesor (vista tienda)
-asesorFilter.innerHTML = '<option value="">Todos los asesores</option>' +
-  ASESORES.map(a => `<option value="${a.asesor}">${a.asesor}</option>`).join('');
+loadSheetData()
+  .then(({ ASESORES: a, TIENDAS: t }) => { ASESORES = a; TIENDAS = t; init(); })
+  .catch(err => {
+    kpisEl.innerHTML = `<div class="kpi"><div class="lbl">No se pudo leer la hoja</div><div class="foot">${err.message}. Verifica que siga compartida como "Cualquiera con el enlace".</div></div>`;
+  });
 
-// ---------- eventos ----------
-document.querySelectorAll('.tab').forEach(tb => tb.addEventListener('click', () => {
-  if (tb.dataset.view === view) return;
-  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === tb));
-  view = tb.dataset.view; filtro = null; texto = ''; sortKey = 'avance'; asesorSel = '';
-  buscar.value = ''; setupView();
-}));
-buscar.addEventListener('input', () => { texto = buscar.value.trim().toLowerCase(); render(); });
-orden.addEventListener('change', () => { sortKey = orden.value; render(); });
-asesorFilter.addEventListener('change', () => { asesorSel = asesorFilter.value; render(); });
+function init() {
+  // ---------- KPIs (totales de la plaza, fijos) ----------
+  const tot = ASESORES.reduce((s, a) => ({ n: s.n + a.nuevas, m: s.m + a.meta, t: s.t + a.tiendas }), { n: 0, m: 0, t: 0 });
+  const avance = tot.n / tot.m * 100;
+  kpisEl.innerHTML = `
+    <div class="kpi hero">
+      <div class="lbl">Cuentas Nuevas — Plaza Oaxaca</div>
+      <div class="val">${nf(tot.n)}</div>
+      <div class="foot">Meta ${nf(tot.m)} (${(tot.m / tot.t).toFixed(1)} prom./tienda)</div>
+      <div class="bar-meta"><i style="width:${Math.min(avance, 100)}%"></i></div>
+    </div>
+    <div class="kpi"><div class="lbl">Avance Meta</div><div class="val">${avance.toFixed(0)}%</div><div class="foot">${nf(Math.max(tot.m - tot.n, 0))} restantes</div></div>
+    <div class="kpi"><div class="lbl">Asesores</div><div class="val">${ASESORES.length}</div><div class="foot">${tot.t} tiendas</div></div>
+    <div class="kpi"><div class="lbl">Tiendas ≥ Meta</div><div class="val">${TIENDAS.filter(t => t.avance >= 100).length}</div><div class="foot">de ${TIENDAS.length} tiendas</div></div>
+    <div class="kpi star">
+      <div class="lbl">Prom. x Tienda vs Meta</div>
+      <div class="val">${(tot.n / tot.t).toFixed(2)}<small class="vs"> / 10.2</small></div>
+      <div class="foot">promedio real de cuentas por tienda</div>
+      <div class="bar-meta"><i style="width:${Math.min(tot.n / tot.t / 10.2 * 100, 100)}%"></i></div>
+    </div>`;
+
+  // ---------- configuración por vista ----------
+  VIEWS = {
+    asesor: {
+      data: ASESORES,
+      hint: 'Datos en vivo de la hoja Tiendas: <b>Cuentas nuevas</b> ÷ <b>Meta</b> = <b>% Cum vs Meta</b> (~10.2 prom./tienda). La marca oscura es el 100% de la meta.',
+      placeholder: 'Buscar asesor…',
+      sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['tiendas', 'Nº de tiendas'], ['nombre', 'Nombre A–Z']],
+      name: a => a.asesor,
+      sub: a => `${a.tiendas} tiendas · meta ${a.meta}`,
+      text: t => t.toLowerCase(),
+      useAsesorFilter: false,
+    },
+    tienda: {
+      data: TIENDAS,
+      hint: 'Avance de cada <b>tienda</b>: Cuentas nuevas ÷ Meta. Usa el filtro para ver solo las tiendas de un asesor. La marca oscura es el 100% de la meta.',
+      placeholder: 'Buscar tienda…',
+      sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['nombre', 'Tienda A–Z']],
+      name: t => t.tienda,
+      sub: t => `${t.cr} · ${t.asesor} · meta ${t.meta}`,
+      text: t => `${t.tienda} ${t.asesor} ${t.cr}`.toLowerCase(),
+      useAsesorFilter: true,
+    },
+  };
+
+  asesorFilter.innerHTML = '<option value="">Todos los asesores</option>' +
+    ASESORES.map(a => `<option value="${a.asesor}">${a.asesor}</option>`).join('');
+
+  document.querySelectorAll('.tab').forEach(tb => tb.addEventListener('click', () => {
+    if (tb.dataset.view === view) return;
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === tb));
+    view = tb.dataset.view; filtro = null; texto = ''; sortKey = 'avance'; asesorSel = '';
+    buscar.value = ''; setupView();
+  }));
+  buscar.addEventListener('input', () => { texto = buscar.value.trim().toLowerCase(); render(); });
+  orden.addEventListener('change', () => { sortKey = orden.value; render(); });
+  asesorFilter.addEventListener('change', () => { asesorSel = asesorFilter.value; render(); });
+
+  setupView();
+}
 
 function setupView() {
   const v = VIEWS[view];
@@ -129,5 +136,3 @@ function render() {
       <div class="acnt">${nf(d.nuevas)}/${d.meta}</div>
     </div>`).join('');
 }
-
-setupView();
