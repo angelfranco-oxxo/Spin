@@ -321,7 +321,7 @@ footer{
 /* gap generoso + borde con tinte azul: el fondo de página y el vidrio de
    las tarjetas son casi del mismo tono, así que sin esto la separación
    entre paneles es invisible aunque el gap exista en el layout. */
-.insights-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:22px}
+.insights-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin:22px 0}
 @media(max-width:1080px){.insights-grid{grid-template-columns:1fr;gap:16px}}
 .card.mini{
   padding:20px 22px 18px;
