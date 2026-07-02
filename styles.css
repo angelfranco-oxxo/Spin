@@ -318,9 +318,16 @@ footer{
    Insights compartidos: distribución + top/bottom + tooltip.
    Usado por el dashboard principal y por Spin Premia.
    --------------------------------------------------------------- */
-.insights-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
-@media(max-width:1080px){.insights-grid{grid-template-columns:1fr}}
-.card.mini{padding:20px 22px 18px}
+/* gap generoso + borde con tinte azul: el fondo de página y el vidrio de
+   las tarjetas son casi del mismo tono, así que sin esto la separación
+   entre paneles es invisible aunque el gap exista en el layout. */
+.insights-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:22px}
+@media(max-width:1080px){.insights-grid{grid-template-columns:1fr;gap:16px}}
+.card.mini{
+  padding:20px 22px 18px;
+  border:1px solid rgba(0,51,160,.14);
+  box-shadow:0 10px 26px rgba(0,30,80,.10), inset 0 1px 0 rgba(255,255,255,.85);
+}
 
 .donut-row{display:flex;align-items:center;gap:18px;margin-top:12px}
 .legend{flex:1;min-width:0}
