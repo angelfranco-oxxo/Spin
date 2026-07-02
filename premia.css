@@ -10,7 +10,7 @@
 .kpi-donut svg{flex:none}
 
 /* Gráfico de ranking (SVG dibujado a mano en premia.js). */
-.chart-wrap{margin:8px 0 28px;overflow-x:auto;padding-bottom:6px}
+.chart-wrap{margin:8px 0 36px;overflow-x:auto;padding-bottom:10px}
 .chart-wrap svg{display:block;margin:0 auto;max-width:none}
 
 /* Fila de asesor clicable: abre el modal con sus tiendas. */
@@ -18,7 +18,7 @@
 .arow.clicable:hover .anm{color:var(--azul)}
 
 /* ---------- fila de insights: distribución + top/bottom ---------- */
-.insights-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
+.insights-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:22px 0}
 @media(max-width:1080px){.insights-grid{grid-template-columns:1fr}}
 .card.mini{padding:20px 22px 18px}
 

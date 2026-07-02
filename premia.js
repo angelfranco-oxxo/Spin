@@ -31,8 +31,8 @@ function donutSVG(pctReal, size = 108, tip = '') {
 // ---------- ranking vertical (columna por asesor) ----------
 function barChartSVG(items, { value, max, suffix = '%' }) {
   const n = items.length;
-  const colW = 116, barW = 42;          // separacion minima para que valores y nombres no se encimen
-  const chartH = 210, padTop = 34, labelH = 64, sideGap = 34;
+  const colW = 136, barW = 44;          // separacion minima para que valores y nombres no se encimen
+  const chartH = 210, padTop = 34, labelH = 78, sideGap = 40;
   const w = n * colW + sideGap * 2, h = padTop + chartH + labelH;
   const gradId = 'bg' + (gid++);
   const metaY = max > 100 ? padTop + chartH * (1 - 100 / max) : null;
