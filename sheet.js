@@ -9,8 +9,7 @@ const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
 const PLAZA = 'oaxaca'; // filtro defensivo por si la hoja crece a más plazas
 
 function parseCSV(text) {
-  // Sin campos entre comillas en esta hoja: split simple por línea/coma alcanza.
-  return text.trim().split('\n').map(row => row.split(','));
+  return text.trim().split('\n').map(row => row.split(',').map(c => c.replace(/\r$/, '').trim()));
 }
 
 function pct(s) { return parseFloat(String(s).replace('%', '').trim()) || 0; }

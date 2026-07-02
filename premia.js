@@ -130,26 +130,15 @@ let ASESORES = [], TIENDAS = [];
 const $ = id => document.getElementById(id);
 const kpisEl = $('kpis'), chartEl = $('chart'), listEl = $('alist'), emptyEl = $('empty');
 const buscar = $('buscar'), hintEl = $('hint');
-const distDonutEl = $('distDonut'), topListEl = $('topList'), bottomListEl = $('bottomList');
+const distDonutEl = $('distDonut'), distHintEl = $('distHint'), topListEl = $('topList'), bottomListEl = $('bottomList');
 
-// ---------- tooltip flotante, reusado por todas las gráficas SVG ----------
-// Cualquier elemento con [data-tip] muestra su contenido al pasar el cursor.
 const chartTip = $('chartTip');
-function bindTooltips(root) {
-  root.querySelectorAll('[data-tip]').forEach(el => {
-    el.addEventListener('mouseenter', e => {
-      chartTip.textContent = el.dataset.tip;
-      chartTip.hidden = false;
-      moveTip(e);
-    });
-    el.addEventListener('mousemove', moveTip);
-    el.addEventListener('mouseleave', () => { chartTip.hidden = true; });
-  });
-}
-function moveTip(e) {
-  chartTip.style.left = e.clientX + 'px';
-  chartTip.style.top = e.clientY + 'px';
-}
+function moveTip(e) { chartTip.style.left = e.clientX + 'px'; chartTip.style.top = e.clientY + 'px'; }
+document.body.addEventListener('mousemove', e => {
+  const el = e.target.closest('[data-tip]');
+  if (el) { chartTip.textContent = el.dataset.tip; chartTip.hidden = false; moveTip(e); }
+  else { chartTip.hidden = true; }
+});
 
 kpisEl.innerHTML = `<div class="kpi"><div class="lbl">Conectando con Sheets…</div></div>`;
 
@@ -182,6 +171,7 @@ function rowHTML(d, i, m, isAsesor) {
 }
 
 function init() {
+  distHintEl.textContent = `Reparto de las ${TIENDAS.length} tiendas para la métrica activa.`;
   const tot = TIENDAS.reduce((s, t) => ({
     avanceTraf: s.avanceTraf + t.avanceTrafico, pctServ: s.pctServ + t.pctServicios,
     reg: s.reg + t.registros, afil: s.afil + t.afiliaciones,
@@ -215,8 +205,6 @@ function init() {
       <div class="val">${ASESORES.length}<small class="vs"> asesores</small></div>
       <div class="foot">${n} tiendas · Plaza Oaxaca</div>
     </div>`;
-  bindTooltips(kpisEl);
-
   document.querySelectorAll('.mtab').forEach(tb => tb.addEventListener('click', () => {
     if (tb.dataset.m === metrica) return;
     document.querySelectorAll('.mtab').forEach(x => x.classList.toggle('on', x === tb));
@@ -232,9 +220,8 @@ function render() {
   const m = METRICAS[metrica];
   const ranked = [...ASESORES].sort((a, b) => b[m.key] - a[m.key]);
   chartEl.innerHTML = barChartSVG(ranked, { value: a => a[m.key], max: m.max, suffix: m.suffix });
-  bindTooltips(chartEl);
 
-  // Distribución de las 257 tiendas para la métrica activa.
+  // Distribución para la métrica activa.
   const valores = TIENDAS.map(t => t[m.key]);
   const buckets = bucketsFor(m.key, valores).map(b => ({ ...b, count: valores.filter(b.test).length }));
   distDonutEl.innerHTML = `
@@ -242,7 +229,6 @@ function render() {
     <div class="legend">${buckets.map(b => `
       <div class="legend-row"><span class="legend-dot" style="background:${b.color}"></span>${b.lbl}<span class="legend-count" style="color:${b.color}">${b.count}</span></div>`).join('')}
     </div>`;
-  bindTooltips(distDonutEl);
 
   // Top / bottom 3 tiendas para la métrica activa.
   const sortedT = [...TIENDAS].sort((a, b) => b[m.key] - a[m.key]);

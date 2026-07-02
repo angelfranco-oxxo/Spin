@@ -24,16 +24,13 @@ const kpisEl = $('kpis'), distEl = $('dist'), listEl = $('alist'), emptyEl = $('
 const buscar = $('buscar'), orden = $('orden'), hintEl = $('hint'), asesorFilter = $('asesorFilter');
 const distDonutEl = $('distDonut'), distHintEl = $('distHint'), topListEl = $('topList'), bottomListEl = $('bottomList');
 
-// ---------- tooltip flotante para cualquier elemento con [data-tip] ----------
 const chartTip = $('chartTip');
-function bindTooltips(root) {
-  root.querySelectorAll('[data-tip]').forEach(el => {
-    el.addEventListener('mouseenter', e => { chartTip.textContent = el.dataset.tip; chartTip.hidden = false; moveTip(e); });
-    el.addEventListener('mousemove', moveTip);
-    el.addEventListener('mouseleave', () => { chartTip.hidden = true; });
-  });
-}
 function moveTip(e) { chartTip.style.left = e.clientX + 'px'; chartTip.style.top = e.clientY + 'px'; }
+document.body.addEventListener('mousemove', e => {
+  const el = e.target.closest('[data-tip]');
+  if (el) { chartTip.textContent = el.dataset.tip; chartTip.hidden = false; moveTip(e); }
+  else { chartTip.hidden = true; }
+});
 
 // ---------- dona multi-segmento (distribución por estatus) ----------
 function multiDonutSVG(segments, size = 132) {
@@ -160,15 +157,13 @@ function setupView() {
   }));
 
   // Dona de distribución: mismos buckets de los chips, de la vista activa.
-  distHintEl.textContent = view === 'asesor' ? 'Reparto de los 11 asesores por estatus.' : 'Reparto de las 254 tiendas por estatus.';
+  distHintEl.textContent = view === 'asesor' ? `Reparto de los ${ASESORES.length} asesores por estatus.` : `Reparto de las ${TIENDAS.length} tiendas por estatus.`;
   const segs = buckets.map(b => ({ lbl: b.lbl, bg: b.bg, count: v.data.filter(b.test).length }));
   distDonutEl.innerHTML = `
     ${multiDonutSVG(segs)}
     <div class="legend">${segs.map(s => `
       <div class="legend-row"><span class="legend-dot" style="background:${s.bg}"></span>${s.lbl}<span class="legend-count" style="color:${s.bg}">${s.count}</span></div>`).join('')}
     </div>`;
-  bindTooltips(distDonutEl);
-
   // Top / A reforzar: siempre por tienda (dato accionable concreto), sin importar la vista activa.
   const sortedT = [...TIENDAS].sort((a, b) => b.avance - a.avance);
   topListEl.innerHTML = sortedT.slice(0, 3).map((t, i) => miniRowHTML(t, i, true)).join('');
@@ -201,5 +196,4 @@ function render() {
       <div class="acnt">${nf(d.nuevas)}/${d.meta}</div>
     </div>`;
   }).join('');
-  bindTooltips(listEl);
 }

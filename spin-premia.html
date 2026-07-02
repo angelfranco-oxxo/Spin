@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Dashboard de Avance Spin Premia · Plaza Oaxaca. Tráfico, Servicios y Afiliaciones por asesor, actualizado en vivo desde Google Sheets.">
 <title>Avance Spin Premia · Plaza Oaxaca</title>
+<link rel="icon" href="spin-logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="premia.css">
 </head>
@@ -20,8 +25,8 @@
   </div>
   <div class="nav-links">
     <a class="btn-inicio" href="index.html" title="Ir al dashboard de Cuentas Nuevas">Cuentas Nuevas</a>
-    <!-- placeholder: crea indicadores-generales.html en este mismo repo cuando exista ese dashboard -->
-    <a class="btn-inicio" href="indicadores-generales.html" title="Ir al dashboard de indicadores generales">‹ Inicio</a>
+    <!-- placeholder: quita hidden cuando exista indicadores-generales.html -->
+    <a class="btn-inicio" href="indicadores-generales.html" title="Ir al dashboard de indicadores generales" hidden>‹ Inicio</a>
   </div>
 </header>
 
@@ -45,7 +50,7 @@
 <div class="insights-grid">
   <div class="card mini">
     <h2>Distribución</h2>
-    <div class="hint">Reparto de las 257 tiendas para la métrica activa.</div>
+    <div class="hint" id="distHint"></div>
     <div class="donut-row" id="distDonut"></div>
   </div>
   <div class="card mini">

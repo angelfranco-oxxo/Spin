@@ -7,8 +7,6 @@
    SPIN como identificador, no el rojo de OXXO.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap');
-
 :root{
   --azul:   #0033A0;   /* SPIN — azul señal. El único color identificador. */
   --azul2:  #00C2D1;   /* cyan SPIN — extremo del degradado de acento */
