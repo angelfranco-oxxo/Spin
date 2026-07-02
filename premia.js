@@ -60,7 +60,7 @@ function barChartSVG(items, { value, max, suffix = '%' }) {
         font-size="10" font-weight="700" fill="#6B6B6B">META</text>`
     : '';
 
-  return `<svg class="bar-chart-svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
+  return `<svg class="bar-chart-svg" viewBox="0 0 ${w} ${h}" width="100%" style="height:auto;display:block" preserveAspectRatio="xMidYMid meet">
     <defs><linearGradient id="${gradId}" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0%" stop-color="${AZUL}"/><stop offset="100%" stop-color="${AZUL2}"/>
     </linearGradient></defs>
@@ -232,7 +232,6 @@ function render() {
   const m = METRICAS[metrica];
   const ranked = [...ASESORES].sort((a, b) => b[m.key] - a[m.key]);
   chartEl.innerHTML = barChartSVG(ranked, { value: a => a[m.key], max: m.max, suffix: m.suffix });
-  chartEl.scrollLeft = 0;
   bindTooltips(chartEl);
 
   // Distribución de las 257 tiendas para la métrica activa.
