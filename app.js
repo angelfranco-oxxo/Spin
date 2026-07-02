@@ -22,6 +22,53 @@ const marca100 = 100 / ESCALA * 100;
 const $ = id => document.getElementById(id);
 const kpisEl = $('kpis'), distEl = $('dist'), listEl = $('alist'), emptyEl = $('empty');
 const buscar = $('buscar'), orden = $('orden'), hintEl = $('hint'), asesorFilter = $('asesorFilter');
+const distDonutEl = $('distDonut'), distHintEl = $('distHint'), topListEl = $('topList'), bottomListEl = $('bottomList');
+
+// ---------- tooltip flotante para cualquier elemento con [data-tip] ----------
+const chartTip = $('chartTip');
+function bindTooltips(root) {
+  root.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mouseenter', e => { chartTip.textContent = el.dataset.tip; chartTip.hidden = false; moveTip(e); });
+    el.addEventListener('mousemove', moveTip);
+    el.addEventListener('mouseleave', () => { chartTip.hidden = true; });
+  });
+}
+function moveTip(e) { chartTip.style.left = e.clientX + 'px'; chartTip.style.top = e.clientY + 'px'; }
+
+// ---------- dona multi-segmento (distribución por estatus) ----------
+function multiDonutSVG(segments, size = 132) {
+  const r = 50, c = 2 * Math.PI * r, cx = size / 2, cy = size / 2;
+  const total = segments.reduce((s, x) => s + x.count, 0) || 1;
+  let acc = 0;
+  const arcs = segments.filter(s => s.count > 0).map(seg => {
+    const len = c * (seg.count / total);
+    const dash = `${Math.max(len - 1.5, 0)} ${c - Math.max(len - 1.5, 0)}`;
+    const offset = -acc;
+    acc += len;
+    const tip = `${seg.lbl}\n${seg.count} · ${(seg.count / total * 100).toFixed(0)}% del total`;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.bg}" stroke-width="18"
+      stroke-linecap="round" stroke-dasharray="${dash}" stroke-dashoffset="${offset}"
+      transform="rotate(-90 ${cx} ${cy})" data-tip="${tip}" style="cursor:pointer"/>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(10,10,10,.06)" stroke-width="18"/>
+    ${arcs}
+    <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-family="var(--font-display)" font-weight="800" font-size="26" fill="#14110E">${total}</text>
+    <text x="${cx}" y="${cy + 17}" text-anchor="middle" font-family="var(--font-body)" font-size="10" fill="#6B6B6B">${total === 1 ? 'item' : 'items'}</text>
+  </svg>`;
+}
+
+function miniRowHTML(t, i, isTop) {
+  return `
+    <div class="mini-row">
+      <div class="mini-badge${isTop ? ' up' : ''}">${i + 1}</div>
+      <div class="mini-info">
+        <div class="mini-name">${t.tienda}</div>
+        <div class="mini-sub">${t.asesor}</div>
+      </div>
+      <div class="mini-val${isTop ? '' : ' low'}">${t.avance}%</div>
+    </div>`;
+}
 
 let ASESORES = [], TIENDAS = [], VIEWS = {};
 let view = 'asesor', filtro = null, texto = '', sortKey = 'avance', asesorSel = '';
@@ -111,6 +158,22 @@ function setupView() {
     distEl.querySelectorAll('.dchip').forEach(c => c.classList.toggle('on', c.dataset.k === filtro));
     render();
   }));
+
+  // Dona de distribución: mismos buckets de los chips, de la vista activa.
+  distHintEl.textContent = view === 'asesor' ? 'Reparto de los 11 asesores por estatus.' : 'Reparto de las 254 tiendas por estatus.';
+  const segs = buckets.map(b => ({ lbl: b.lbl, bg: b.bg, count: v.data.filter(b.test).length }));
+  distDonutEl.innerHTML = `
+    ${multiDonutSVG(segs)}
+    <div class="legend">${segs.map(s => `
+      <div class="legend-row"><span class="legend-dot" style="background:${s.bg}"></span>${s.lbl}<span class="legend-count" style="color:${s.bg}">${s.count}</span></div>`).join('')}
+    </div>`;
+  bindTooltips(distDonutEl);
+
+  // Top / A reforzar: siempre por tienda (dato accionable concreto), sin importar la vista activa.
+  const sortedT = [...TIENDAS].sort((a, b) => b.avance - a.avance);
+  topListEl.innerHTML = sortedT.slice(0, 3).map((t, i) => miniRowHTML(t, i, true)).join('');
+  bottomListEl.innerHTML = sortedT.slice(-3).reverse().map((t, i) => miniRowHTML(t, i, false)).join('');
+
   render();
 }
 
@@ -127,12 +190,16 @@ function render() {
     : (y[sortKey] || 0) - (x[sortKey] || 0));
 
   emptyEl.hidden = arr.length > 0;
-  listEl.innerHTML = arr.map((d, i) => `
-    <div class="arow${i < 3 ? ' top' + (i + 1) : ''}">
+  listEl.innerHTML = arr.map((d, i) => {
+    const tip = `${v.name(d)}\n${v.sub(d)}\n${d.avance}% · ${nf(d.nuevas)}/${nf(d.meta)}`.replace(/"/g, '&quot;');
+    return `
+    <div class="arow${i < 3 ? ' top' + (i + 1) : ''}" data-tip="${tip}">
       <div class="rkn">${i + 1}</div>
       <div><div class="anm">${v.name(d)}</div><div class="ainfo">${v.sub(d)}</div></div>
       <div class="gtrack"><i style="width:${Math.min(d.avance, ESCALA) / ESCALA * 100}%;background:${fill(d.avance)}"></i><span style="left:${marca100}%"></span></div>
       <div class="aav" style="color:${color(d.avance)}">${d.avance}%</div>
       <div class="acnt">${nf(d.nuevas)}/${d.meta}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+  bindTooltips(listEl);
 }

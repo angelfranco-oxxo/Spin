@@ -26,6 +26,24 @@
 
 <section class="kpis" id="kpis"></section>
 
+<div class="insights-grid">
+  <div class="card mini">
+    <h2>Distribución</h2>
+    <div class="hint" id="distHint"></div>
+    <div class="donut-row" id="distDonut"></div>
+  </div>
+  <div class="card mini">
+    <h2>Mejor desempeño</h2>
+    <div class="hint">Top 3 tiendas por avance.</div>
+    <div id="topList"></div>
+  </div>
+  <div class="card mini">
+    <h2>A reforzar</h2>
+    <div class="hint">Tiendas con menor avance.</div>
+    <div id="bottomList"></div>
+  </div>
+</div>
+
 <div class="card">
   <div class="cardtop">
     <div>
@@ -47,6 +65,8 @@
 </div>
 
 <footer>Datos en vivo desde Google Sheets «Tableros Spin» · hoja Tiendas, filtro Plaza 10VHT Oaxaca · Meta ~10.2/tienda.</footer>
+
+<div class="chart-tip" id="chartTip" hidden></div>
 
 <script src="sheet.js"></script>
 <script src="app.js"></script>
