@@ -60,7 +60,7 @@ function barChartSVG(items, { value, max, suffix = '%' }) {
         font-size="10" font-weight="700" fill="#6B6B6B">META</text>`
     : '';
 
-  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" style="height:auto;display:block" preserveAspectRatio="xMidYMid meet">
     <defs><linearGradient id="${gradId}" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0%" stop-color="${AZUL}"/><stop offset="100%" stop-color="${AZUL2}"/>
     </linearGradient></defs>
