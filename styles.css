@@ -169,6 +169,7 @@ h1{
    --------------------------------------------------------------- */
 .card{
   padding:26px 28px 12px;
+  margin-bottom:22px;
   background:var(--vidrio);
   backdrop-filter:blur(var(--blur)) saturate(180%);
   -webkit-backdrop-filter:blur(var(--blur)) saturate(180%);
