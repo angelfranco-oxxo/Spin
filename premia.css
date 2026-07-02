@@ -10,8 +10,8 @@
 .kpi-donut svg{flex:none}
 
 /* Gráfico de ranking (SVG dibujado a mano en premia.js). */
-.chart-wrap{margin:8px 0 28px;overflow-x:auto}
-.chart-wrap svg{display:block}
+.chart-wrap{margin:8px 0 28px;overflow-x:auto;padding-bottom:6px}
+.chart-wrap svg{display:block;margin:0 auto;max-width:none}
 
 /* Fila de asesor clicable: abre el modal con sus tiendas. */
 .arow.clicable{cursor:pointer}

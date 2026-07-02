@@ -31,8 +31,8 @@ function donutSVG(pctReal, size = 108, tip = '') {
 // ---------- ranking vertical (columna por asesor) ----------
 function barChartSVG(items, { value, max, suffix = '%' }) {
   const n = items.length;
-  const colW = 84, barW = 38;           // gap real entre barras = colW - barW = 46px
-  const chartH = 210, padTop = 30, labelH = 56, sideGap = 24;
+  const colW = 116, barW = 42;          // separacion minima para que valores y nombres no se encimen
+  const chartH = 210, padTop = 34, labelH = 64, sideGap = 34;
   const w = n * colW + sideGap * 2, h = padTop + chartH + labelH;
   const gradId = 'bg' + (gid++);
   const metaY = max > 100 ? padTop + chartH * (1 - 100 / max) : null;
@@ -60,7 +60,7 @@ function barChartSVG(items, { value, max, suffix = '%' }) {
         font-size="10" font-weight="700" fill="#6B6B6B">META</text>`
     : '';
 
-  return `<svg viewBox="0 0 ${w} ${h}" width="100%" style="height:auto;display:block" preserveAspectRatio="xMidYMid meet">
+  return `<svg class="bar-chart-svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
     <defs><linearGradient id="${gradId}" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0%" stop-color="${AZUL}"/><stop offset="100%" stop-color="${AZUL2}"/>
     </linearGradient></defs>
@@ -232,6 +232,7 @@ function render() {
   const m = METRICAS[metrica];
   const ranked = [...ASESORES].sort((a, b) => b[m.key] - a[m.key]);
   chartEl.innerHTML = barChartSVG(ranked, { value: a => a[m.key], max: m.max, suffix: m.suffix });
+  chartEl.scrollLeft = 0;
   bindTooltips(chartEl);
 
   // Distribución de las 257 tiendas para la métrica activa.
