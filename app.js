@@ -80,11 +80,10 @@ function tiendaRowHTML(t, i) {
       <div class="acnt">${nf(t.nuevas)}/${t.meta}</div>
     </div>`;
 }
-let ASESORES = [], TIENDAS = [], VIEWS = {};
-let view = 'asesor', filtro = null, texto = '', sortKey = 'avance', asesorSel = '';
-let modalAsesor = null, modalTexto = '';
+let ASESORES = [], TIENDAS = [];
+let filtro = null, texto = '', sortKey = 'avance', asesorSel = '';
 
-kpisEl.innerHTML = `<div class="kpi"><div class="lbl">Conectando con Sheets…</div></div>`;
+kpisEl.innerHTML = `<div class="kpi"><div class="lbl">Conectando con Sheets...</div></div>`;
 
 loadSheetData()
   .then(({ ASESORES: a, TIENDAS: t }) => { ASESORES = a; TIENDAS = t; init(); })
@@ -93,19 +92,18 @@ loadSheetData()
   });
 
 function init() {
-  // ---------- KPIs (totales de la plaza, fijos) ----------
   const tot = ASESORES.reduce((s, a) => ({ n: s.n + a.nuevas, m: s.m + a.meta, t: s.t + a.tiendas }), { n: 0, m: 0, t: 0 });
   const avance = tot.n / tot.m * 100;
   kpisEl.innerHTML = `
     <div class="kpi hero">
-      <div class="lbl">Cuentas Nuevas — Plaza Oaxaca</div>
+      <div class="lbl">Cuentas Nuevas - Plaza Oaxaca</div>
       <div class="val">${nf(tot.n)}</div>
       <div class="foot">Meta ${nf(tot.m)} (${(tot.m / tot.t).toFixed(1)} prom./tienda)</div>
       <div class="bar-meta"><i style="width:${Math.min(avance, 100)}%"></i></div>
     </div>
     <div class="kpi"><div class="lbl">Avance Meta</div><div class="val">${avance.toFixed(0)}%</div><div class="foot">${nf(Math.max(tot.m - tot.n, 0))} restantes</div></div>
     <div class="kpi"><div class="lbl">Asesores</div><div class="val">${ASESORES.length}</div><div class="foot">${tot.t} tiendas</div></div>
-    <div class="kpi"><div class="lbl">Tiendas ≥ Meta</div><div class="val">${TIENDAS.filter(t => t.avance >= 100).length}</div><div class="foot">de ${TIENDAS.length} tiendas</div></div>
+    <div class="kpi"><div class="lbl">Tiendas >= Meta</div><div class="val">${TIENDAS.filter(t => t.avance >= 100).length}</div><div class="foot">de ${TIENDAS.length} tiendas</div></div>
     <div class="kpi star">
       <div class="lbl">Prom. x Tienda vs Meta</div>
       <div class="val">${(tot.n / tot.t).toFixed(2)}<small class="vs"> / 10.2</small></div>
@@ -113,56 +111,70 @@ function init() {
       <div class="bar-meta"><i style="width:${Math.min(tot.n / tot.t / 10.2 * 100, 100)}%"></i></div>
     </div>`;
 
-  // ---------- configuración por vista ----------
-  VIEWS = {
-    asesor: {
-      data: ASESORES,
-      hint: 'Datos en vivo de la hoja Tiendas: <b>Cuentas nuevas</b> ÷ <b>Meta</b> = <b>% Cum vs Meta</b> (~10.2 prom./tienda). La marca oscura es el 100% de la meta.',
-      placeholder: 'Buscar asesor…',
-      sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['tiendas', 'Nº de tiendas'], ['nombre', 'Nombre A–Z']],
-      name: a => a.asesor,
-      sub: a => `${a.tiendas} tiendas · meta ${a.meta}`,
-      text: t => t.toLowerCase(),
-      useAsesorFilter: false,
-    },
-    tienda: {
-      data: TIENDAS,
-      hint: 'Avance de cada <b>tienda</b>: Cuentas nuevas ÷ Meta. Usa el filtro para ver solo las tiendas de un asesor. La marca oscura es el 100% de la meta.',
-      placeholder: 'Buscar tienda…',
-      sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['nombre', 'Tienda A–Z']],
-      name: t => t.tienda,
-      sub: t => `${t.cr} · ${t.asesor} · meta ${t.meta}`,
-      text: t => `${t.tienda} ${t.asesor} ${t.cr}`.toLowerCase(),
-      useAsesorFilter: true,
-    },
-  };
-
   asesorFilter.innerHTML = '<option value="">Todos los asesores</option>' +
     ASESORES.map(a => `<option value="${a.asesor}">${a.asesor}</option>`).join('');
 
-  document.querySelectorAll('.tab').forEach(tb => tb.addEventListener('click', () => {
-    if (tb.dataset.view === view) return;
-    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === tb));
-    view = tb.dataset.view; filtro = null; texto = ''; sortKey = 'avance'; asesorSel = '';
-    buscar.value = ''; setupView();
-  }));
   buscar.addEventListener('input', () => { texto = buscar.value.trim().toLowerCase(); render(); });
   orden.addEventListener('change', () => { sortKey = orden.value; render(); });
-  asesorFilter.addEventListener('change', () => { asesorSel = asesorFilter.value; render(); });
+  asesorFilter.addEventListener('change', () => {
+    asesorSel = asesorFilter.value;
+    filtro = null;
+    texto = '';
+    sortKey = 'avance';
+    buscar.value = '';
+    setupView();
+  });
 
   setupView();
 }
 
+function context() {
+  if (asesorSel) {
+    const data = TIENDAS.filter(t => t.asesor === asesorSel);
+    return {
+      mode: 'tienda',
+      title: asesorSel,
+      data,
+      hint: 'Tiendas del asesor seleccionado: <b>Cuentas nuevas</b> / <b>Meta</b>. La marca oscura es el 100% de la meta.',
+      distHint: `Reparto de las ${data.length} tiendas de ${asesorSel} por estatus.`,
+      placeholder: 'Buscar tienda...',
+      sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['nombre', 'Tienda A-Z']],
+      name: t => t.tienda,
+      sub: t => `${t.cr} - meta ${t.meta}`,
+      text: t => `${t.tienda} ${t.cr}`.toLowerCase(),
+      topSource: data,
+    };
+  }
+  return {
+    mode: 'asesor',
+    title: 'General',
+    data: ASESORES,
+    hint: 'Selecciona un asesor para desplegar sus tiendas con barras de avance. Sin seleccion se muestra el resumen general de tiendas y asesores.',
+    distHint: `Reparto de los ${ASESORES.length} asesores por estatus.`,
+    placeholder: 'Buscar asesor...',
+    sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['tiendas', 'No. de tiendas'], ['nombre', 'Nombre A-Z']],
+    name: a => a.asesor,
+    sub: a => `${a.tiendas} tiendas - meta ${a.meta}`,
+    text: a => a.asesor.toLowerCase(),
+    topSource: TIENDAS,
+  };
+}
+
 function setupView() {
-  const v = VIEWS[view];
-  hintEl.innerHTML = v.hint;
-  buscar.placeholder = v.placeholder;
-  orden.innerHTML = v.sorts.map(([k, l], i) => `<option value="${k}"${i ? '' : ' selected'}>Ordenar: ${l}</option>`).join('');
-  asesorFilter.hidden = !v.useAsesorFilter;
-  asesorFilter.value = '';
+  const ctx = context();
+  const titleEl = $('detailTitle');
+  if (titleEl) titleEl.textContent = ctx.title;
+  hintEl.innerHTML = ctx.hint;
+  buscar.placeholder = ctx.placeholder;
+  buscar.hidden = !asesorSel;
+  orden.hidden = !asesorSel;
+  distEl.hidden = !asesorSel;
+  orden.innerHTML = ctx.sorts.map(([k, l]) => `<option value="${k}"${k === sortKey ? ' selected' : ''}>Ordenar: ${l}</option>`).join('');
+  if (!ctx.sorts.some(([k]) => k === sortKey)) sortKey = ctx.sorts[0][0];
+
   distEl.classList.remove('filtering');
   distEl.innerHTML = buckets.map(b =>
-    `<div class="dchip" data-k="${b.k}" style="--swatch:${b.bg}">${b.lbl}<small>${v.data.filter(b.test).length}</small></div>`).join('');
+    `<div class="dchip" data-k="${b.k}" style="--swatch:${b.bg}">${b.lbl}<small>${ctx.data.filter(b.test).length}</small></div>`).join('');
   distEl.querySelectorAll('.dchip').forEach(chip => chip.addEventListener('click', () => {
     filtro = filtro === chip.dataset.k ? null : chip.dataset.k;
     distEl.classList.toggle('filtering', !!filtro);
@@ -170,80 +182,47 @@ function setupView() {
     render();
   }));
 
-  // Dona de distribución: mismos buckets de los chips, de la vista activa.
-  distHintEl.textContent = view === 'asesor' ? `Reparto de los ${ASESORES.length} asesores por estatus.` : `Reparto de las ${TIENDAS.length} tiendas por estatus.`;
-  const segs = buckets.map(b => ({ lbl: b.lbl, bg: b.bg, count: v.data.filter(b.test).length }));
+  distHintEl.textContent = ctx.distHint;
+  const segs = buckets.map(b => ({ lbl: b.lbl, bg: b.bg, count: ctx.data.filter(b.test).length }));
   distDonutEl.innerHTML = `
     ${multiDonutSVG(segs)}
     <div class="legend">${segs.map(s => `
       <div class="legend-row"><span class="legend-dot" style="background:${s.bg}"></span>${s.lbl}<span class="legend-count" style="color:${s.bg}">${s.count}</span></div>`).join('')}
     </div>`;
-  // Top / A reforzar: siempre por tienda (dato accionable concreto), sin importar la vista activa.
-  const sortedT = [...TIENDAS].sort((a, b) => b.avance - a.avance);
+
+  const sortedT = [...ctx.topSource].sort((a, b) => b.avance - a.avance);
   topListEl.innerHTML = sortedT.slice(0, 3).map((t, i) => miniRowHTML(t, i, true)).join('');
   bottomListEl.innerHTML = sortedT.slice(-3).reverse().map((t, i) => miniRowHTML(t, i, false)).join('');
 
   render();
 }
 
-function openModal(asesorNombre) {
-  modalAsesor = asesorNombre;
-  modalTexto = '';
-  modalBuscar.value = '';
-  modalTitle.textContent = asesorNombre;
-  renderModal();
-  modalOverlay.hidden = false;
-  document.body.classList.add('modal-open');
-  modalBuscar.focus();
-}
-
-function closeModal() {
-  modalOverlay.hidden = true;
-  document.body.classList.remove('modal-open');
-}
-
-function renderModal() {
-  const tiendas = TIENDAS.filter(t => t.asesor === modalAsesor &&
-    (!modalTexto || `${t.tienda} ${t.cr}`.toLowerCase().includes(modalTexto))
-  );
-  const sorted = [...tiendas].sort((a, b) => b.avance - a.avance);
-  const tot = tiendas.reduce((s, t) => ({ n: s.n + t.nuevas, m: s.m + t.meta }), { n: 0, m: 0 });
-  const avance = tot.m ? +(tot.n / tot.m * 100).toFixed(1) : 0;
-  modalSub.textContent = `${tiendas.length} tiendas - avance ${avance}% - ${nf(tot.n)}/${nf(tot.m)}`;
-  modalListEl.innerHTML = sorted.length
-    ? sorted.map((t, i) => tiendaRowHTML(t, i)).join('')
-    : '<div class="empty">Sin tiendas con ese filtro.</div>';
-}
 function render() {
-  const v = VIEWS[view];
+  const ctx = context();
+  if (!asesorSel) {
+    listEl.innerHTML = '';
+    emptyEl.hidden = true;
+    return;
+  }
   const bucket = buckets.find(b => b.k === filtro);
-  let arr = v.data.filter(d =>
-    (!texto || v.text(d).includes(texto)) &&
-    (!bucket || bucket.test(d)) &&
-    (!asesorSel || d.asesor === asesorSel)
+  let arr = ctx.data.filter(d =>
+    (!texto || ctx.text(d).includes(texto)) &&
+    (!bucket || bucket.test(d))
   );
   arr = [...arr].sort((x, y) => sortKey === 'nombre'
-    ? v.name(x).localeCompare(v.name(y))
+    ? ctx.name(x).localeCompare(ctx.name(y))
     : (y[sortKey] || 0) - (x[sortKey] || 0));
 
   emptyEl.hidden = arr.length > 0;
   listEl.innerHTML = arr.map((d, i) => {
-    const tip = `${v.name(d)}\n${v.sub(d)}\n${d.avance}% · ${nf(d.nuevas)}/${nf(d.meta)}`.replace(/"/g, '&quot;');
+    const tip = `${ctx.name(d)}\n${ctx.sub(d)}\n${d.avance}% - ${nf(d.nuevas)}/${nf(d.meta)}`.replace(/"/g, '&quot;');
     return `
-    <div class="arow${i < 3 ? ' top' + (i + 1) : ''}${view === 'asesor' ? ' clicable' : ''}" data-tip="${tip}"${view === 'asesor' ? ` data-asesor="${d.asesor.replace(/"/g, '&quot;')}"` : ''}>
+    <div class="arow${i < 3 ? ' top' + (i + 1) : ''}" data-tip="${tip}">
       <div class="rkn">${i + 1}</div>
-      <div><div class="anm">${v.name(d)}</div><div class="ainfo">${v.sub(d)}</div></div>
+      <div><div class="anm">${ctx.name(d)}</div><div class="ainfo">${ctx.sub(d)}</div></div>
       <div class="gtrack"><i style="width:${Math.min(d.avance, ESCALA) / ESCALA * 100}%;background:${fill(d.avance)}"></i><span style="left:${marca100}%"></span></div>
       <div class="aav" style="color:${color(d.avance)}">${d.avance}%</div>
       <div class="acnt">${nf(d.nuevas)}/${d.meta}</div>
     </div>`;
   }).join('');
 }
-listEl.addEventListener('click', e => {
-  const row = e.target.closest('.arow[data-asesor]');
-  if (row) openModal(row.dataset.asesor);
-});
-modalClose.addEventListener('click', closeModal);
-modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
-modalBuscar.addEventListener('input', () => { modalTexto = modalBuscar.value.trim().toLowerCase(); renderModal(); });
