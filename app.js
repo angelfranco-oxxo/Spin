@@ -20,7 +20,7 @@ const buckets = [
 ];
 const marca100 = 100 / ESCALA * 100;
 const $ = id => document.getElementById(id);
-const kpisEl = $('kpis'), distEl = $('dist'), listEl = $('alist'), emptyEl = $('empty');
+const kpisEl = $('kpis'), distEl = $('dist'), listEl = $('alist'), emptyEl = $('empty'), generalGaugeEl = $('generalGauge');
 const buscar = $('buscar'), orden = $('orden'), hintEl = $('hint'), asesorFilter = $('asesorFilter');
 const distDonutEl = $('distDonut'), distHintEl = $('distHint'), topListEl = $('topList'), bottomListEl = $('bottomList');
 const modalOverlay = $('modalOverlay'), modalTitle = $('modalTitle'), modalSub = $('modalSub'),
@@ -55,6 +55,34 @@ function multiDonutSVG(segments, size = 132) {
     <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-family="var(--font-display)" font-weight="800" font-size="26" fill="#14110E">${total}</text>
     <text x="${cx}" y="${cy + 17}" text-anchor="middle" font-family="var(--font-body)" font-size="10" fill="#6B6B6B">${total === 1 ? 'item' : 'items'}</text>
   </svg>`;
+}
+function speedometerHTML(pct, label, foot) {
+  const capped = Math.max(0, Math.min(pct, 120));
+  const arc = Math.min(capped / 120 * 100, 100);
+  const angle = -90 + (capped / 120 * 180);
+  const pctText = `${pct.toFixed(0)}%`;
+  return `
+    <div class="speedometer">
+      <svg viewBox="0 0 280 170" role="img" aria-label="${label} ${pctText}">
+        <path class="gauge-bg" pathLength="100" d="M 35 135 A 105 105 0 0 1 245 135" />
+        <path class="gauge-fill" pathLength="100" d="M 35 135 A 105 105 0 0 1 245 135" style="stroke-dasharray:${arc} 100" />
+        <g class="gauge-ticks">
+          <line x1="35" y1="135" x2="48" y2="135" />
+          <line x1="140" y1="30" x2="140" y2="43" />
+          <line x1="245" y1="135" x2="232" y2="135" />
+        </g>
+        <text x="35" y="158" class="gauge-scale">0</text>
+        <text x="140" y="24" class="gauge-scale mid">60</text>
+        <text x="245" y="158" class="gauge-scale end">120</text>
+        <line class="gauge-needle" x1="140" y1="135" x2="140" y2="55" transform="rotate(${angle} 140 135)" />
+        <circle class="gauge-pin" cx="140" cy="135" r="8" />
+        <text x="140" y="111" class="gauge-value">${pctText}</text>
+      </svg>
+      <div class="speedometer-copy">
+        <div class="speedometer-label">${label}</div>
+        <div class="speedometer-foot">${foot}</div>
+      </div>
+    </div>`;
 }
 
 function miniRowHTML(t, i, isTop) {
@@ -146,16 +174,16 @@ function context() {
     };
   }
   return {
-    mode: 'tienda',
-    title: 'General de tiendas',
-    data: TIENDAS,
-    hint: 'Todas las tiendas de la plaza con barras de avance. Selecciona un asesor arriba para ver solo sus tiendas.',
-    distHint: `Reparto de las ${TIENDAS.length} tiendas por estatus.`,
-    placeholder: 'Buscar tienda...',
-    sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['nombre', 'Tienda A-Z']],
-    name: t => t.tienda,
-    sub: t => `${t.cr} - ${t.asesor} - meta ${t.meta}`,
-    text: t => `${t.tienda} ${t.asesor} ${t.cr}`.toLowerCase(),
+    mode: 'asesor',
+    title: 'General',
+    data: ASESORES,
+    hint: 'Selecciona un asesor para desplegar sus tiendas con barras de avance. Sin seleccion se muestra el avance general.',
+    distHint: `Reparto de los ${ASESORES.length} asesores por estatus.`,
+    placeholder: 'Buscar asesor...',
+    sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['nombre', 'Asesor A-Z']],
+    name: a => a.asesor,
+    sub: a => `${a.tiendas} tiendas - meta ${a.meta}`,
+    text: a => a.asesor.toLowerCase(),
     topSource: TIENDAS,
   };
 }
@@ -168,6 +196,23 @@ function setupView() {
   buscar.placeholder = ctx.placeholder;
   orden.innerHTML = ctx.sorts.map(([k, l]) => `<option value="${k}"${k === sortKey ? ' selected' : ''}>Ordenar: ${l}</option>`).join('');
   if (!ctx.sorts.some(([k]) => k === sortKey)) sortKey = ctx.sorts[0][0];
+
+  const isAdvisorView = !!asesorSel;
+  buscar.hidden = !isAdvisorView;
+  orden.hidden = !isAdvisorView;
+  distEl.hidden = !isAdvisorView;
+  if (generalGaugeEl) {
+    generalGaugeEl.hidden = isAdvisorView;
+    if (!isAdvisorView) {
+      const total = TIENDAS.reduce((s, t) => ({ n: s.n + t.nuevas, m: s.m + t.meta }), { n: 0, m: 0 });
+      const avance = total.m ? total.n / total.m * 100 : 0;
+      generalGaugeEl.innerHTML = speedometerHTML(
+        avance,
+        'Avance general de tiendas',
+        `${nf(total.n)} cuentas nuevas de ${nf(total.m)} meta - ${TIENDAS.length} tiendas - ${ASESORES.length} asesores`
+      );
+    }
+  }
 
   distEl.classList.remove('filtering');
   distEl.innerHTML = buckets.map(b =>
@@ -196,6 +241,11 @@ function setupView() {
 
 function render() {
   const ctx = context();
+  if (!asesorSel) {
+    listEl.innerHTML = '';
+    emptyEl.hidden = true;
+    return;
+  }
   const bucket = buckets.find(b => b.k === filtro);
   let arr = ctx.data.filter(d =>
     (!texto || ctx.text(d).includes(texto)) &&
