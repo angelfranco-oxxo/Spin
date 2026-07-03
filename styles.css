@@ -361,3 +361,44 @@ footer{
   white-space:pre-line;max-width:220px;
   box-shadow:0 10px 26px rgba(0,0,0,.28);
 }
+/* Modal compartido: detalle de tiendas por asesor. */
+.arow.clicable{cursor:pointer}
+.arow.clicable:hover .anm{color:var(--azul)}
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(10,15,30,.45);
+  backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+}
+.modal-overlay[hidden]{display:none}
+.modal{
+  width:min(760px,100%);max-height:85vh;overflow-y:auto;
+  background:linear-gradient(150deg,rgba(255,255,255,.94),rgba(240,246,255,.9));
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(255,255,255,.8);
+  border-radius:20px;
+  box-shadow:0 30px 70px rgba(0,20,60,.28);
+  padding:24px 26px 26px;
+}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+.modal-title{font-family:var(--font-display);font-size:24px;font-weight:800;color:var(--tinta)}
+.modal-close{
+  border:1px solid rgba(10,10,10,.14);background:rgba(255,255,255,.7);
+  width:32px;height:32px;border-radius:50%;
+  font-size:14px;color:var(--gris);cursor:pointer;flex:none;
+  transition:background .15s,color .15s;
+}
+.modal-close:hover{background:var(--alerta);color:#fff;border-color:var(--alerta)}
+#modalBuscar{width:100%;margin-bottom:16px}
+.modal-list{display:flex;flex-direction:column;gap:10px}
+.modal-list .arow{grid-template-columns:30px minmax(120px,1fr) 2fr 54px 82px}
+body.modal-open{overflow:hidden}
+
+@media(max-width:640px){
+  .modal{padding:20px 18px}
+  .modal-list .arow{grid-template-columns:24px 1fr 54px;row-gap:8px}
+  .modal-list .arow .gtrack{grid-column:2/4}
+  .modal-list .arow .acnt{grid-column:1/4;text-align:left}
+}

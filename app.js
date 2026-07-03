@@ -23,6 +23,8 @@ const $ = id => document.getElementById(id);
 const kpisEl = $('kpis'), distEl = $('dist'), listEl = $('alist'), emptyEl = $('empty');
 const buscar = $('buscar'), orden = $('orden'), hintEl = $('hint'), asesorFilter = $('asesorFilter');
 const distDonutEl = $('distDonut'), distHintEl = $('distHint'), topListEl = $('topList'), bottomListEl = $('bottomList');
+const modalOverlay = $('modalOverlay'), modalTitle = $('modalTitle'), modalSub = $('modalSub'),
+      modalClose = $('modalClose'), modalBuscar = $('modalBuscar'), modalListEl = $('modalList');
 
 const chartTip = $('chartTip');
 function moveTip(e) { chartTip.style.left = e.clientX + 'px'; chartTip.style.top = e.clientY + 'px'; }
@@ -67,8 +69,20 @@ function miniRowHTML(t, i, isTop) {
     </div>`;
 }
 
+function tiendaRowHTML(t, i) {
+  const tip = `${t.tienda}\n${t.cr} - ${t.asesor}\n${t.avance}% - ${nf(t.nuevas)}/${nf(t.meta)}`.replace(/"/g, '&quot;');
+  return `
+    <div class="arow" data-tip="${tip}">
+      <div class="rkn">${i + 1}</div>
+      <div><div class="anm">${t.tienda}</div><div class="ainfo">${t.cr} - meta ${t.meta}</div></div>
+      <div class="gtrack"><i style="width:${Math.min(t.avance, ESCALA) / ESCALA * 100}%;background:${fill(t.avance)}"></i><span style="left:${marca100}%"></span></div>
+      <div class="aav" style="color:${color(t.avance)}">${t.avance}%</div>
+      <div class="acnt">${nf(t.nuevas)}/${t.meta}</div>
+    </div>`;
+}
 let ASESORES = [], TIENDAS = [], VIEWS = {};
 let view = 'asesor', filtro = null, texto = '', sortKey = 'avance', asesorSel = '';
+let modalAsesor = null, modalTexto = '';
 
 kpisEl.innerHTML = `<div class="kpi"><div class="lbl">Conectando con Sheets…</div></div>`;
 
@@ -172,6 +186,34 @@ function setupView() {
   render();
 }
 
+function openModal(asesorNombre) {
+  modalAsesor = asesorNombre;
+  modalTexto = '';
+  modalBuscar.value = '';
+  modalTitle.textContent = asesorNombre;
+  renderModal();
+  modalOverlay.hidden = false;
+  document.body.classList.add('modal-open');
+  modalBuscar.focus();
+}
+
+function closeModal() {
+  modalOverlay.hidden = true;
+  document.body.classList.remove('modal-open');
+}
+
+function renderModal() {
+  const tiendas = TIENDAS.filter(t => t.asesor === modalAsesor &&
+    (!modalTexto || `${t.tienda} ${t.cr}`.toLowerCase().includes(modalTexto))
+  );
+  const sorted = [...tiendas].sort((a, b) => b.avance - a.avance);
+  const tot = tiendas.reduce((s, t) => ({ n: s.n + t.nuevas, m: s.m + t.meta }), { n: 0, m: 0 });
+  const avance = tot.m ? +(tot.n / tot.m * 100).toFixed(1) : 0;
+  modalSub.textContent = `${tiendas.length} tiendas - avance ${avance}% - ${nf(tot.n)}/${nf(tot.m)}`;
+  modalListEl.innerHTML = sorted.length
+    ? sorted.map((t, i) => tiendaRowHTML(t, i)).join('')
+    : '<div class="empty">Sin tiendas con ese filtro.</div>';
+}
 function render() {
   const v = VIEWS[view];
   const bucket = buckets.find(b => b.k === filtro);
@@ -188,7 +230,7 @@ function render() {
   listEl.innerHTML = arr.map((d, i) => {
     const tip = `${v.name(d)}\n${v.sub(d)}\n${d.avance}% · ${nf(d.nuevas)}/${nf(d.meta)}`.replace(/"/g, '&quot;');
     return `
-    <div class="arow${i < 3 ? ' top' + (i + 1) : ''}" data-tip="${tip}">
+    <div class="arow${i < 3 ? ' top' + (i + 1) : ''}${view === 'asesor' ? ' clicable' : ''}" data-tip="${tip}"${view === 'asesor' ? ` data-asesor="${d.asesor.replace(/"/g, '&quot;')}"` : ''}>
       <div class="rkn">${i + 1}</div>
       <div><div class="anm">${v.name(d)}</div><div class="ainfo">${v.sub(d)}</div></div>
       <div class="gtrack"><i style="width:${Math.min(d.avance, ESCALA) / ESCALA * 100}%;background:${fill(d.avance)}"></i><span style="left:${marca100}%"></span></div>
@@ -197,3 +239,11 @@ function render() {
     </div>`;
   }).join('');
 }
+listEl.addEventListener('click', e => {
+  const row = e.target.closest('.arow[data-asesor]');
+  if (row) openModal(row.dataset.asesor);
+});
+modalClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
+modalBuscar.addEventListener('input', () => { modalTexto = modalBuscar.value.trim().toLowerCase(); renderModal(); });
