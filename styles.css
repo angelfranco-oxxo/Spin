@@ -480,3 +480,27 @@ body.modal-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   .gauge-fill,.gauge-needle{transition:none}
 }
+
+/* ---------------------------------------------------------------
+   Centro de Dashboards — hero de bienvenida y grid de accesos.
+   --------------------------------------------------------------- */
+.hero{padding:44px var(--gutter) 40px}
+.hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gris);margin-bottom:10px}
+.hero .hero-title{font-family:var(--font-display);font-size:clamp(32px,5vw,var(--display));font-weight:800;color:var(--tinta);line-height:1.05;text-transform:none;letter-spacing:0}
+.hero .hero-title::before{content:none}
+.hero-desc{margin-top:14px;max-width:640px;color:var(--gris);font-size:14px;line-height:1.6}
+
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-bottom:22px}
+.dash-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-height:190px}
+.dash-status{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:5px 12px;border-radius:99px;
+}
+.dash-status.live{color:var(--azul);background:rgba(0,51,160,.1)}
+.dash-status.live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--azul2);box-shadow:0 0 0 3px rgba(0,194,209,.2)}
+.dash-status.soon{color:var(--gris);background:rgba(10,10,10,.06)}
+.dash-name{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--tinta)}
+.dash-desc{font-size:12.5px;color:var(--gris);line-height:1.5;flex:1}
+.dash-card.soon{opacity:.6}
+.dash-card.soon .btn-inicio{border-color:rgba(10,10,10,.16);color:var(--gris);background:rgba(10,10,10,.04);pointer-events:none}

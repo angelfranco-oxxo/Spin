@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Dashboard de Cuentas Nuevas SPIN BY OXXO · Plaza Oaxaca. Avance vs meta por asesor y tienda, actualizado en vivo desde Google Sheets.">
-<title>Dashboard SPIN BY OXXO · Plaza Oaxaca</title>
+<meta name="description" content="Centro de Dashboards SPIN BY OXXO · Plaza Oaxaca. Acceso a los indicadores de Cuentas Nuevas, Spin Premia y próximos tableros.">
+<title>Centro de Dashboards · SPIN BY OXXO Plaza Oaxaca</title>
 <link rel="icon" href="spin-logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,72 +19,58 @@
     <img class="logo-spin" src="spin-logo.svg" alt="SPIN">
     <div>
       <h1>Dashboards Ats</h1>
-      <div class="sub">Seguimiento Spin por mes</div>
+      <div class="sub">Centro de Dashboards</div>
     </div>
-  </div>
-  <div class="nav-links">
-    <a class="btn-inicio" href="spin-premia.html" title="Ir al dashboard de Avance Spin Premia">Spin Premia</a>
-    <!-- placeholder: quita hidden cuando exista indicadores-generales.html -->
-    <a class="btn-inicio" href="indicadores-generales.html" title="Ir al dashboard de indicadores generales" hidden>‹ Inicio</a>
   </div>
 </header>
 
-<section class="kpis" id="kpis"></section>
+<div class="card hero">
+  <div class="hero-eyebrow">Spin by OXXO · Plaza Oaxaca</div>
+  <h2 class="hero-title">Centro de Dashboards</h2>
+  <p class="hero-desc">Desde aquí puedes consultar los diferentes tableros de seguimiento Spin, actualizados en vivo desde Google Sheets. Elige un dashboard para ver el detalle.</p>
+</div>
 
-<div class="insights-grid">
-  <div class="card mini">
-    <h2>Distribución</h2>
-    <div class="hint" id="distHint"></div>
-    <div class="donut-row" id="distDonut"></div>
+<div class="dash-grid">
+  <div class="card mini dash-card">
+    <span class="dash-status live">Disponible</span>
+    <div class="dash-name">Cuentas Nuevas</div>
+    <p class="dash-desc">Avance vs meta de cuentas nuevas por asesor y por tienda.</p>
+    <a class="btn-inicio" href="cuentas-nuevas.html">Ver dashboard</a>
   </div>
-  <div class="card mini">
-    <h2>Mejor desempeño</h2>
-    <div class="hint">Top 3 tiendas por avance.</div>
-    <div id="topList"></div>
+
+  <div class="card mini dash-card">
+    <span class="dash-status live">Disponible</span>
+    <div class="dash-name">Spin Premia</div>
+    <p class="dash-desc">Tráfico, Servicios / Telefonía y Afiliaciones por asesor.</p>
+    <a class="btn-inicio" href="spin-premia.html">Ver dashboard</a>
   </div>
-  <div class="card mini">
-    <h2>A reforzar</h2>
-    <div class="hint">Tiendas con menor avance.</div>
-    <div id="bottomList"></div>
+
+  <!-- placeholder: quita dash-card.soon, cambia el badge a "live" y agrega href="dashboard-3.html" cuando exista -->
+  <div class="card mini dash-card soon">
+    <span class="dash-status soon">Próximamente</span>
+    <div class="dash-name">Dashboard 3</div>
+    <p class="dash-desc">En desarrollo. Estará disponible próximamente.</p>
+    <a class="btn-inicio" href="#" aria-disabled="true">En desarrollo</a>
+  </div>
+
+  <!-- placeholder: quita dash-card.soon, cambia el badge a "live" y agrega href="dashboard-4.html" cuando exista -->
+  <div class="card mini dash-card soon">
+    <span class="dash-status soon">Próximamente</span>
+    <div class="dash-name">Dashboard 4</div>
+    <p class="dash-desc">En desarrollo. Estará disponible próximamente.</p>
+    <a class="btn-inicio" href="#" aria-disabled="true">En desarrollo</a>
+  </div>
+
+  <!-- placeholder: quita dash-card.soon, cambia el badge a "live" y agrega href="dashboard-5.html" cuando exista -->
+  <div class="card mini dash-card soon">
+    <span class="dash-status soon">Próximamente</span>
+    <div class="dash-name">Dashboard 5</div>
+    <p class="dash-desc">En desarrollo. Estará disponible próximamente.</p>
+    <a class="btn-inicio" href="#" aria-disabled="true">En desarrollo</a>
   </div>
 </div>
 
-<div class="card">
-  <div class="cardtop">
-    <div>
-      <h2 id="detailTitle">General</h2>
-      <div class="hint" id="hint"></div>
-    </div>
-    <div class="tools">
-      <select class="sortby" id="asesorFilter"></select>
-      <input class="search" id="buscar" type="search" placeholder="Buscar…" autocomplete="off">
-      <select class="sortby" id="orden"></select>
-    </div>
-  </div>
-  <div class="general-gauge" id="generalGauge"></div>
-  <div class="dist" id="dist"></div>
-  <div id="alist"></div>
-  <div class="empty" id="empty" hidden>Sin resultados con ese filtro.</div>
-</div>
+<footer>Datos en vivo desde Google Sheets «Tableros Spin» · Plaza 10VHT Oaxaca.</footer>
 
-<footer>Datos en vivo desde Google Sheets «Tableros Spin» · hoja Tiendas, filtro Plaza 10VHT Oaxaca · Meta ~10.2/tienda.</footer>
-
-<div class="modal-overlay" id="modalOverlay" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-head">
-      <div>
-        <h2 id="modalTitle" class="modal-title"></h2>
-        <div class="hint" id="modalSub"></div>
-      </div>
-      <button class="modal-close" id="modalClose" aria-label="Cerrar">x</button>
-    </div>
-    <input class="search" id="modalBuscar" type="search" placeholder="Buscar tienda..." autocomplete="off">
-    <div id="modalList" class="modal-list"></div>
-  </div>
-</div>
-<div class="chart-tip" id="chartTip" hidden></div>
-
-<script src="sheet.js"></script>
-<script src="app.js"></script>
 </body>
 </html>
