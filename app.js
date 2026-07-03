@@ -56,6 +56,10 @@ function multiDonutSVG(segments, size = 132) {
     <text x="${cx}" y="${cy + 17}" text-anchor="middle" font-family="var(--font-body)" font-size="10" fill="#6B6B6B">${total === 1 ? 'item' : 'items'}</text>
   </svg>`;
 }
+// Se dibuja "en reposo" (arco en 0, aguja al mínimo) con los valores finales
+// guardados en data-*; animateGauge() los aplica un instante después para
+// que la transición CSS se vea (si arrancara ya en su posición final, no
+// habría nada que animar).
 function speedometerHTML(pct, label, foot) {
   const capped = Math.max(0, Math.min(pct, 120));
   const arc = Math.min(capped / 120 * 100, 100);
@@ -65,7 +69,7 @@ function speedometerHTML(pct, label, foot) {
     <div class="speedometer">
       <svg viewBox="0 0 280 170" role="img" aria-label="${label} ${pctText}">
         <path class="gauge-bg" pathLength="100" d="M 35 135 A 105 105 0 0 1 245 135" />
-        <path class="gauge-fill" pathLength="100" d="M 35 135 A 105 105 0 0 1 245 135" style="stroke-dasharray:${arc} 100" />
+        <path class="gauge-fill" pathLength="100" data-arc="${arc}" d="M 35 135 A 105 105 0 0 1 245 135" style="stroke-dasharray:0 100" />
         <g class="gauge-ticks">
           <line x1="35" y1="135" x2="48" y2="135" />
           <line x1="140" y1="30" x2="140" y2="43" />
@@ -74,15 +78,36 @@ function speedometerHTML(pct, label, foot) {
         <text x="35" y="158" class="gauge-scale">0</text>
         <text x="140" y="24" class="gauge-scale mid">60</text>
         <text x="245" y="158" class="gauge-scale end">120</text>
-        <line class="gauge-needle" x1="140" y1="135" x2="140" y2="55" transform="rotate(${angle} 140 135)" />
+        <line class="gauge-needle" data-angle="${angle}" x1="140" y1="135" x2="140" y2="55" style="transform:rotate(-90deg)" />
         <circle class="gauge-pin" cx="140" cy="135" r="8" />
-        <text x="140" y="111" class="gauge-value">${pctText}</text>
+        <text x="140" y="111" class="gauge-value" data-pct="${pct}">0%</text>
       </svg>
       <div class="speedometer-copy">
         <div class="speedometer-label">${label}</div>
         <div class="speedometer-foot">${foot}</div>
       </div>
     </div>`;
+}
+
+// Dispara la animación: arco, aguja y el número contando hasta su valor real.
+function animateGauge(root) {
+  const fill = root.querySelector('.gauge-fill');
+  const needle = root.querySelector('.gauge-needle');
+  const valueText = root.querySelector('.gauge-value');
+  if (!fill) return;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    fill.style.strokeDasharray = `${fill.dataset.arc} 100`;
+    needle.style.transform = `rotate(${needle.dataset.angle}deg)`;
+    const target = parseFloat(valueText.dataset.pct), start = performance.now(), dur = 1000;
+    // El texto del centro no puede usar transition CSS con "%" al final,
+    // así que el conteo se hace a mano con requestAnimationFrame.
+    function step(now) {
+      const t = Math.min((now - start) / dur, 1), eased = 1 - Math.pow(1 - t, 3);
+      valueText.textContent = `${Math.round(target * eased)}%`;
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }));
 }
 
 function miniRowHTML(t, i, isTop) {
@@ -211,6 +236,7 @@ function setupView() {
         'Avance general de tiendas',
         `${nf(total.n)} cuentas nuevas de ${nf(total.m)} meta - ${TIENDAS.length} tiendas - ${ASESORES.length} asesores`
       );
+      animateGauge(generalGaugeEl);
     }
   }
 
