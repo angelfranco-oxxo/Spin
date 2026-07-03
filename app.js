@@ -146,16 +146,16 @@ function context() {
     };
   }
   return {
-    mode: 'asesor',
-    title: 'General',
-    data: ASESORES,
-    hint: 'Selecciona un asesor para desplegar sus tiendas con barras de avance. Sin seleccion se muestra el resumen general de tiendas y asesores.',
-    distHint: `Reparto de los ${ASESORES.length} asesores por estatus.`,
-    placeholder: 'Buscar asesor...',
-    sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['tiendas', 'No. de tiendas'], ['nombre', 'Nombre A-Z']],
-    name: a => a.asesor,
-    sub: a => `${a.tiendas} tiendas - meta ${a.meta}`,
-    text: a => a.asesor.toLowerCase(),
+    mode: 'tienda',
+    title: 'General de tiendas',
+    data: TIENDAS,
+    hint: 'Todas las tiendas de la plaza con barras de avance. Selecciona un asesor arriba para ver solo sus tiendas.',
+    distHint: `Reparto de las ${TIENDAS.length} tiendas por estatus.`,
+    placeholder: 'Buscar tienda...',
+    sorts: [['avance', 'Avance %'], ['nuevas', 'Cuentas nuevas'], ['nombre', 'Tienda A-Z']],
+    name: t => t.tienda,
+    sub: t => `${t.cr} - ${t.asesor} - meta ${t.meta}`,
+    text: t => `${t.tienda} ${t.asesor} ${t.cr}`.toLowerCase(),
     topSource: TIENDAS,
   };
 }
@@ -166,9 +166,6 @@ function setupView() {
   if (titleEl) titleEl.textContent = ctx.title;
   hintEl.innerHTML = ctx.hint;
   buscar.placeholder = ctx.placeholder;
-  buscar.hidden = !asesorSel;
-  orden.hidden = !asesorSel;
-  distEl.hidden = !asesorSel;
   orden.innerHTML = ctx.sorts.map(([k, l]) => `<option value="${k}"${k === sortKey ? ' selected' : ''}>Ordenar: ${l}</option>`).join('');
   if (!ctx.sorts.some(([k]) => k === sortKey)) sortKey = ctx.sorts[0][0];
 
@@ -199,11 +196,6 @@ function setupView() {
 
 function render() {
   const ctx = context();
-  if (!asesorSel) {
-    listEl.innerHTML = '';
-    emptyEl.hidden = true;
-    return;
-  }
   const bucket = buckets.find(b => b.k === filtro);
   let arr = ctx.data.filter(d =>
     (!texto || ctx.text(d).includes(texto)) &&

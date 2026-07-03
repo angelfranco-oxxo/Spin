@@ -220,6 +220,14 @@ h1{
   box-shadow:0 0 0 3px rgba(0,51,160,.14);
 }
 .sortby{cursor:pointer}
+#asesorFilter{
+  min-width:min(360px,100%);
+  padding:14px 20px;
+  font-size:15px;
+  font-weight:700;
+  border-width:1.5px;
+  box-shadow:0 8px 22px rgba(0,51,160,.08);
+}
 
 /* ---------------------------------------------------------------
    Distribución / filtros — leyenda flush-left; el color sigue
