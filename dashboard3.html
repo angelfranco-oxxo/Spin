@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Dashboard de Avance Spin Premia · Plaza Oaxaca. Tráfico, Servicios y Afiliaciones por asesor, actualizado en vivo desde Google Sheets.">
-<title>Avance Spin Premia · Plaza Oaxaca</title>
+<meta name="description" content="Dashboard de Gestión Promocional · Plaza Oaxaca. Avance por promoción, asesor y tienda, actualizado en vivo desde Google Sheets.">
+<title>Gestión Promocional · Plaza Oaxaca</title>
 <link rel="icon" href="spin-logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,12 +20,12 @@
     <img class="logo-spin" src="spin-logo.svg" alt="SPIN">
     <div>
       <h1>Dashboards Ats</h1>
-      <div class="sub">Avance Spin Premia · por mes</div>
+      <div class="sub">Gestión Promocional · por periodo</div>
     </div>
   </div>
   <div class="nav-links">
     <a class="btn-inicio" href="cuentas-nuevas.html" title="Ir al dashboard de Cuentas Nuevas">Cuentas Nuevas</a>
-    <a class="btn-inicio" href="dashboard3.html" title="Ir al dashboard de Gestión Promocional">Gestión Promocional</a>
+    <a class="btn-inicio" href="spin-premia.html" title="Ir al dashboard de Avance Spin Premia">Spin Premia</a>
     <a class="btn-inicio" href="index.html" title="Volver al Centro de Dashboards">‹ Inicio</a>
   </div>
 </header>
@@ -35,12 +35,8 @@
 <div class="card">
   <div class="cardtop">
     <div>
-      <div class="tabs">
-        <button class="tab mtab on" data-m="trafico">Tráfico</button>
-        <button class="tab mtab" data-m="servicios">Servicios / Telefonía</button>
-        <button class="tab mtab" data-m="afiliaciones">Afiliaciones</button>
-      </div>
-      <div class="hint">Ranking de asesores para la métrica seleccionada. Datos en vivo desde Sheets.</div>
+      <div class="tabs" id="promoTabs"></div>
+      <div class="hint">Ranking de asesores para la promoción seleccionada. Datos en vivo desde Sheets.</div>
     </div>
   </div>
 
@@ -55,12 +51,12 @@
   </div>
   <div class="card mini">
     <h2>Mejor desempeño</h2>
-    <div class="hint">Top 3 tiendas en la métrica activa.</div>
+    <div class="hint">Top 3 tiendas en la promoción activa.</div>
     <div id="topList"></div>
   </div>
   <div class="card mini">
     <h2>A reforzar</h2>
-    <div class="hint">Tiendas con menor avance en la métrica activa.</div>
+    <div class="hint">Tiendas con menor avance en la promoción activa.</div>
     <div id="bottomList"></div>
   </div>
 </div>
@@ -80,7 +76,7 @@
   <div class="empty" id="empty" hidden>Sin resultados con ese filtro.</div>
 </div>
 
-<footer>Datos en vivo desde Google Sheets «Tableros Spin» · hoja Dashboard2 (Avance Spin Premia) · filtro Plaza 10VHT Oaxaca.</footer>
+<footer>Datos en vivo desde Google Sheets «Tableros Spin» · hoja Dashboard3 (Gestión Promocional) · filtro Plaza 10VHT Oaxaca.</footer>
 
 <div class="modal-overlay" id="modalOverlay" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -98,7 +94,7 @@
 
 <div class="chart-tip" id="chartTip" hidden></div>
 
-<script src="premia-sheet.js"></script>
-<script src="premia.js"></script>
+<script src="dashboard3-sheet.js"></script>
+<script src="dashboard3.js"></script>
 </body>
 </html>
