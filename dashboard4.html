@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Dashboard 4 SPIN BY OXXO · Plaza Oaxaca. Seguimiento por indicador, asesor y tienda, actualizado en vivo desde Google Sheets.">
+<title>Dashboard 4 · Plaza Oaxaca</title>
+<link rel="icon" href="spin-logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="premia.css">
+</head>
+<body>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<header>
+  <div class="brand">
+    <img class="logo-spin" src="spin-logo.svg" alt="SPIN">
+    <div>
+      <h1>Dashboards Ats</h1>
+      <div class="sub">Dashboard 4 · seguimiento</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a class="btn-inicio" href="cuentas-nuevas.html" title="Ir al dashboard de Cuentas Nuevas">Cuentas Nuevas</a>
+    <a class="btn-inicio" href="spin-premia.html" title="Ir al dashboard de Avance Spin Premia">Spin Premia</a>
+    <a class="btn-inicio" href="dashboard3.html" title="Ir a Gestión Promocional">Gestión Promocional</a>
+    <a class="btn-inicio" href="index.html" title="Volver al Centro de Dashboards">‹ Inicio</a>
+  </div>
+</header>
+
+<section class="kpis kpis-4" id="kpis"></section>
+
+<div class="card">
+  <div class="cardtop">
+    <div>
+      <div class="tabs" id="metricTabs"></div>
+      <div class="hint">Ranking de asesores para el indicador seleccionado. Datos en vivo desde Sheets.</div>
+    </div>
+  </div>
+  <div class="chart-wrap" id="chart"></div>
+</div>
+
+<div class="insights-grid">
+  <div class="card mini">
+    <h2>Distribución</h2>
+    <div class="hint" id="distHint"></div>
+    <div class="donut-row" id="distDonut"></div>
+  </div>
+  <div class="card mini">
+    <h2>Mejor desempeño</h2>
+    <div class="hint">Top 3 tiendas del indicador activo.</div>
+    <div id="topList"></div>
+  </div>
+  <div class="card mini">
+    <h2>A reforzar</h2>
+    <div class="hint">Tiendas con menor avance del indicador activo.</div>
+    <div id="bottomList"></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="cardtop">
+    <div>
+      <h2>Por Asesor</h2>
+      <div class="hint" id="hint"></div>
+    </div>
+    <div class="tools">
+      <input class="search" id="buscar" type="search" placeholder="Buscar asesor..." autocomplete="off">
+    </div>
+  </div>
+  <div id="alist"></div>
+  <div class="empty" id="empty" hidden>Sin resultados con ese filtro.</div>
+</div>
+
+<footer>Datos en vivo desde Google Sheets «Tableros Spin» · hoja Dashboard4 · filtro Plaza 10VHT Oaxaca.</footer>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div>
+        <h2 id="modalTitle" class="modal-title"></h2>
+        <div class="hint" id="modalSub"></div>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Cerrar">x</button>
+    </div>
+    <input class="search" id="modalBuscar" type="search" placeholder="Buscar tienda..." autocomplete="off">
+    <div id="modalList" class="modal-list"></div>
+  </div>
+</div>
+
+<div class="chart-tip" id="chartTip" hidden></div>
+
+<script src="dashboard4-sheet.js"></script>
+<script src="dashboard4.js"></script>
+</body>
+</html>
