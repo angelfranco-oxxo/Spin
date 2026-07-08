@@ -157,13 +157,17 @@ h1{
 .kpi .vs{font-size:19px;font-weight:400;color:var(--gris)}
 .kpi .foot{font-size:11.5px;margin-top:8px;color:var(--gris)}
 .kpi.hero .foot{color:var(--tinta)}
-.kpi.star .val{color:var(--azul)}
 
 .bar-meta{height:5px;border-radius:99px;background:rgba(10,10,10,.08);margin-top:12px;overflow:hidden}
 .bar-meta>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--azul2),var(--azul))}
 
 @media(max-width:1080px){.kpis{grid-template-columns:1fr 1fr 1fr}.kpi.hero{grid-column:1/-1}}
 @media(max-width:680px){.kpis{grid-template-columns:1fr 1fr}}
+
+/* Variante de 4 columnas (dashboards sin el quinto KPI "prom./tienda"). */
+.kpis.kpis-4{grid-template-columns:1.5fr 1fr 1fr 1fr}
+@media(max-width:1080px){.kpis.kpis-4{grid-template-columns:1fr 1fr}.kpis.kpis-4 .kpi.hero{grid-column:1/-1}}
+@media(max-width:680px){.kpis.kpis-4{grid-template-columns:1fr}}
 
 /* ---------------------------------------------------------------
    Sección de listado — segunda losa de vidrio.

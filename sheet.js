@@ -24,7 +24,8 @@ async function loadSheetData() {
   const col = name => header.findIndex(h => h.trim().toLowerCase() === name.toLowerCase());
   const iAsesor = col('Asesor'), iPlaza = col('Plaza'), iCr = col('Cr Tienda'),
         iNombre = col('Nombre Tienda'), iMeta = col('Meta'), iNuevas = col('Cuentas nuevas'),
-        iAvance = col('% Cum vs Meta (Total');
+        iAvance = col('% Cum vs Meta (Total'), iRepos = col('Reposiciones'),
+        iEstatus = col('Estatus Total'), iAfil7 = col('Afiliaciones 7 días');
 
   const TIENDAS = rows.slice(2)
     .filter(r => r.length > iAvance && (r[iPlaza] || '').toLowerCase().includes(PLAZA))
@@ -32,13 +33,16 @@ async function loadSheetData() {
       cr: r[iCr], tienda: r[iNombre], asesor: r[iAsesor],
       meta: Math.round(num(r[iMeta])), nuevas: Math.round(num(r[iNuevas])),
       avance: +pct(r[iAvance]).toFixed(1),
+      repos: Math.round(num(r[iRepos])), afil7: Math.round(num(r[iAfil7])),
+      estatus: (r[iEstatus] || '').trim(),
     }));
 
   const porAsesor = {};
   TIENDAS.forEach(t => {
-    if (!porAsesor[t.asesor]) porAsesor[t.asesor] = { asesor: t.asesor, tiendas: 0, meta: 0, nuevas: 0 };
+    if (!porAsesor[t.asesor]) porAsesor[t.asesor] = { asesor: t.asesor, tiendas: 0, meta: 0, nuevas: 0, repos: 0, afil7: 0, cumplen: 0 };
     const a = porAsesor[t.asesor];
-    a.tiendas++; a.meta += t.meta; a.nuevas += t.nuevas;
+    a.tiendas++; a.meta += t.meta; a.nuevas += t.nuevas; a.repos += t.repos; a.afil7 += t.afil7;
+    if (t.estatus === 'CUMPLE') a.cumplen++;
   });
   const ASESORES = Object.values(porAsesor).map(a => ({ ...a, avance: +(a.nuevas / a.meta * 100).toFixed(1) }));
 

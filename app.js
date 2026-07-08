@@ -12,11 +12,15 @@ const fill  = a => a >= 100 ? 'linear-gradient(90deg,#00C2D1,#0033A0)'
              : a > 0    ? 'linear-gradient(90deg,#E2523A,#D6331B)'
              : '#D8D8D8';
 
+// Distribución en 6 tramos reales (no solo Cumple/No cumple): el % promedio
+// simple esconde que el grueso de las tiendas está entre 1-69%, no en 0.
 const buckets = [
-  { k: 'meta',  lbl: 'Cumplen meta', test: a => a.avance >= 100,                 bg: '#0033A0' },
-  { k: 'cerca', lbl: '70–99%',       test: a => a.avance >= 70 && a.avance < 100, bg: '#7C93C4' },
-  { k: 'bajo',  lbl: '1–69%',        test: a => a.avance > 0 && a.avance < 70,     bg: '#D6331B' },
-  { k: 'cero',  lbl: 'Sin altas',    test: a => a.avance <= 0,                     bg: '#D8D8D8' },
+  { k: 'cero',  lbl: '0%',      test: a => a.avance <= 0,                       bg: '#9CA3AF' },
+  { k: 'b1',    lbl: '1–49%',   test: a => a.avance > 0 && a.avance < 50,       bg: '#D6331B' },
+  { k: 'b2',    lbl: '50–69%',  test: a => a.avance >= 50 && a.avance < 70,     bg: '#E8813A' },
+  { k: 'b3',    lbl: '70–99%',  test: a => a.avance >= 70 && a.avance < 100,    bg: '#7C93C4' },
+  { k: 'b4',    lbl: '100–149%', test: a => a.avance >= 100 && a.avance < 150,  bg: '#0033A0' },
+  { k: 'b5',    lbl: '150%+',   test: a => a.avance >= 150,                     bg: '#00C2D1' },
 ];
 const marca100 = 100 / ESCALA * 100;
 const $ = id => document.getElementById(id);
@@ -145,23 +149,32 @@ loadSheetData()
   });
 
 function init() {
-  const tot = ASESORES.reduce((s, a) => ({ n: s.n + a.nuevas, m: s.m + a.meta, t: s.t + a.tiendas }), { n: 0, m: 0, t: 0 });
-  const avance = tot.n / tot.m * 100;
+  const tot = ASESORES.reduce((s, a) => ({
+    n: s.n + a.nuevas, m: s.m + a.meta, t: s.t + a.tiendas, r: s.r + a.repos, f: s.f + a.afil7,
+  }), { n: 0, m: 0, t: 0, r: 0, f: 0 });
+  const avance = tot.n / tot.m * 100; // acumulado ponderado, no promedio de % por tienda (ese lo infla el 34 tiendas con meta chica que llegan a 500%+)
+  const cumplen = TIENDAS.filter(t => t.avance >= 100).length;
   kpisEl.innerHTML = `
     <div class="kpi hero">
-      <div class="lbl">Cuentas Nuevas - Plaza Oaxaca</div>
+      <div class="lbl">Cuentas Nuevas — Plaza Oaxaca</div>
       <div class="val">${nf(tot.n)}</div>
-      <div class="foot">Meta ${nf(tot.m)} (${(tot.m / tot.t).toFixed(1)} prom./tienda)</div>
+      <div class="foot">Meta ${nf(tot.m)} · ${avance.toFixed(1)}% acumulado (ponderado, no promedio simple)</div>
       <div class="bar-meta"><i style="width:${Math.min(avance, 100)}%"></i></div>
     </div>
-    <div class="kpi"><div class="lbl">Avance Meta</div><div class="val">${avance.toFixed(0)}%</div><div class="foot">${nf(Math.max(tot.m - tot.n, 0))} restantes</div></div>
-    <div class="kpi"><div class="lbl">Asesores</div><div class="val">${ASESORES.length}</div><div class="foot">${tot.t} tiendas</div></div>
-    <div class="kpi"><div class="lbl">Tiendas >= Meta</div><div class="val">${TIENDAS.filter(t => t.avance >= 100).length}</div><div class="foot">de ${TIENDAS.length} tiendas</div></div>
-    <div class="kpi star">
-      <div class="lbl">Prom. x Tienda vs Meta</div>
-      <div class="val">${(tot.n / tot.t).toFixed(2)}<small class="vs"> / 10.2</small></div>
-      <div class="foot">promedio real de cuentas por tienda</div>
-      <div class="bar-meta"><i style="width:${Math.min(tot.n / tot.t / 10.2 * 100, 100)}%"></i></div>
+    <div class="kpi">
+      <div class="lbl">Tiendas que cumplen meta</div>
+      <div class="val">${cumplen}<small class="vs"> / ${TIENDAS.length}</small></div>
+      <div class="foot">${(cumplen / TIENDAS.length * 100).toFixed(0)}% de las tiendas — el acumulado esconde que la mayoría no llega</div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Reposiciones</div>
+      <div class="val">${nf(tot.r)}</div>
+      <div class="foot">tarjetas repuestas, no cuentan como cuenta nueva</div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Afiliaciones 7 días</div>
+      <div class="val">${nf(tot.f)}</div>
+      <div class="foot">${(tot.f / tot.n * 100).toFixed(0)}% de las cuentas nuevas ya afiliadas en su primera semana</div>
     </div>`;
 
   asesorFilter.innerHTML = '<option value="">Todos los asesores</option>' +
