@@ -3,7 +3,7 @@
 'use strict';
 
 const nf = n => n.toLocaleString('es-MX');
-const AZUL = '#0033A0', AZUL2 = '#00C2D1', AZUL_CLARO = '#B9CDF0';
+const AZUL = '#0E7490', AZUL2 = '#22D3EE', AZUL_CLARO = '#A9E8EF';
 const FONT = "'Barlow Condensed',Helvetica,Arial,sans-serif";
 let gid = 0;
 
@@ -100,7 +100,7 @@ function bucketsFor(key, values) {
   if (key === 'avanceTrafico') {
     return [
       { lbl: 'Cumple meta (≥100%)', test: v => v >= 100, color: AZUL },
-      { lbl: '70–99%', test: v => v >= 70 && v < 100, color: '#7C93C4' },
+      { lbl: '70–99%', test: v => v >= 70 && v < 100, color: '#5FAEB8' },
       { lbl: '< 70%', test: v => v < 70, color: '#D6331B' },
     ];
   }
@@ -109,7 +109,7 @@ function bucketsFor(key, values) {
   const q2 = sorted[Math.floor(sorted.length * 2 / 3)];
   return [
     { lbl: 'Tercio alto', test: v => v >= q2, color: AZUL },
-    { lbl: 'Tercio medio', test: v => v >= q1 && v < q2, color: '#7C93C4' },
+    { lbl: 'Tercio medio', test: v => v >= q1 && v < q2, color: '#5FAEB8' },
     { lbl: 'Tercio bajo', test: v => v < q1, color: '#D6331B' },
   ];
 }

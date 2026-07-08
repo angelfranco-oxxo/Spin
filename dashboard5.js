@@ -3,7 +3,7 @@
 'use strict';
 
 const nf = n => n.toLocaleString('es-MX');
-const AZUL = '#0033A0', AZUL2 = '#00C2D1', AZUL_CLARO = '#B9CDF0';
+const AZUL = '#6D28D9', AZUL2 = '#A78BFA', AZUL_CLARO = '#DCD0F7';
 const FONT = "'Barlow Condensed',Helvetica,Arial,sans-serif";
 let gid = 0;
 
@@ -87,7 +87,7 @@ function multiDonutSVG(segments, size = 132) {
 function bucketsFor(values) {
   return [
     { lbl: 'Cumple meta (100%)', test: v => v >= 100, color: AZUL },
-    { lbl: '70-99%', test: v => v >= 70 && v < 100, color: '#7C93C4' },
+    { lbl: '70-99%', test: v => v >= 70 && v < 100, color: '#9078C4' },
     { lbl: '< 70%', test: v => v < 70, color: '#D6331B' },
   ];
 }
