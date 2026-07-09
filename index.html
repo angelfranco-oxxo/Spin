@@ -11,7 +11,8 @@
 <link rel="stylesheet" href="styles.css">
 <style>
 /* ── Hub-page overrides (solo lo que difiere del sistema de dashboards) ── */
-body { background: #F2F1EF; }
+/* Full-bleed: sin el max-width/padding que styles.css da a los dashboards */
+body { background: #F2F1EF; max-width: none; padding: 0; }
 
 /* Header propio — no hereda el glass panel de styles.css (que aplica a <header>) */
 .hub-header{
