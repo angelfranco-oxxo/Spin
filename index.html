@@ -3,69 +3,301 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Centro de Dashboards SPIN BY OXXO · Plaza Oaxaca. Acceso a los indicadores de Cuentas Nuevas, Spin Premia y próximos tableros.">
-<title>Centro de Dashboards · SPIN BY OXXO Plaza Oaxaca</title>
+<title>Dashboards Ats · SPIN BY OXXO Plaza Oaxaca</title>
 <link rel="icon" href="spin-logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="styles.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',Helvetica,Arial,sans-serif;background:#F2F1EF;color:#14110E;min-height:100vh}
+
+/* ── HEADER ── */
+.hub-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:54px;background:#fff;
+  box-shadow:0 1px 0 rgba(0,0,0,.09);
+  position:sticky;top:0;z-index:200;
+}
+.hub-header-left{display:flex;align-items:center;gap:12px}
+.hub-logo-box{
+  background:#CC0000;border-radius:7px;
+  width:48px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.hub-logo-box img{width:38px;filter:brightness(0) invert(1)}
+.hub-brand-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;
+  color:#14110E;letter-spacing:.02em;line-height:1
+}
+.hub-brand-sub{font-size:9.5px;font-weight:600;color:#999;letter-spacing:.09em;text-transform:uppercase;margin-top:2px}
+.hub-header-right{display:flex;align-items:center;gap:20px}
+.hub-clock{
+  font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
+  color:#CC0000;letter-spacing:.04em;
+}
+
+/* ── HERO ── */
+.hub-hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(118deg,#A80000 0%,#CC0000 45%,#A80000 100%);
+  display:flex;align-items:stretch;min-height:320px;
+}
+.hub-hero-brush{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hub-hero-content{
+  position:relative;z-index:2;
+  padding:40px 48px;flex:1;
+  display:flex;flex-direction:column;justify-content:center;
+  max-width:600px;
+}
+.hub-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);
+  border-radius:20px;padding:5px 14px;margin-bottom:20px;width:max-content;
+  font-family:'Barlow Condensed',sans-serif;font-size:10.5px;font-weight:700;
+  color:#fff;letter-spacing:.12em;text-transform:uppercase;
+}
+.hub-badge-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hub-hero-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(52px,5.5vw,84px);font-weight:800;
+  line-height:.93;color:#fff;
+  margin-bottom:14px;
+}
+.hub-hero-title .accent{color:#F5D78A;display:block}
+.hub-hero-desc{
+  font-size:13.5px;font-weight:500;color:rgba(255,255,255,.78);
+  line-height:1.55;margin-bottom:28px;max-width:440px;
+}
+.hub-stats{display:flex;gap:10px;flex-wrap:wrap}
+.hub-stat{
+  background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.13);
+  border-radius:10px;padding:10px 20px;
+  display:flex;flex-direction:column;align-items:center;min-width:84px;
+}
+.hub-stat-n{
+  font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;
+  color:#fff;line-height:1;
+}
+.hub-stat-l{
+  font-size:8.5px;font-weight:700;color:rgba(255,255,255,.6);
+  letter-spacing:.12em;text-transform:uppercase;margin-top:3px;
+}
+.hub-hero-visual{
+  position:relative;z-index:2;
+  flex:0 0 400px;display:flex;align-items:flex-end;justify-content:center;
+  padding:0 32px 0 0;
+}
+/* Replace the <img src="mascota.png"> below with your mascot image */
+.hub-mascot{
+  width:100%;max-width:360px;object-fit:contain;
+  filter:drop-shadow(0 12px 40px rgba(0,0,0,.45));
+  align-self:flex-end;
+}
+.hub-mascot-placeholder{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  gap:16px;padding-bottom:32px;width:100%;
+}
+.hub-spin-big{
+  width:160px;opacity:.18;
+  filter:brightness(0) invert(1);
+}
+.hub-rings{position:absolute;right:60px;bottom:-30px;width:300px;height:300px;pointer-events:none}
+
+/* ── STATUS BAR ── */
+.hub-statusbar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:#FAFAF8;border-bottom:1px solid #E4E2DE;
+  padding:8px 28px;font-size:11px;font-weight:500;color:#666;
+}
+.hub-status-live{display:flex;align-items:center;gap:7px}
+.hub-status-dot{width:7px;height:7px;border-radius:50%;background:#22C55E;flex-shrink:0}
+
+/* ── DASHBOARD CARDS ── */
+.dash-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:16px;padding:28px;max-width:1400px;margin:0 auto;
+}
+.dash-card{
+  background:#fff;border-radius:14px;padding:24px 20px 20px;
+  display:flex;flex-direction:column;gap:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.05);
+  transition:transform .18s,box-shadow .18s;
+  position:relative;overflow:hidden;
+  border-top:3px solid var(--dash-azul,#0033A0);
+}
+.dash-card:hover{transform:translateY(-3px);box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.dash-status{
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:#22C55E;
+}
+.dash-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;
+  color:#14110E;line-height:1.1;
+}
+.dash-desc{font-size:12.5px;color:#666;line-height:1.5;flex:1}
+.btn-inicio{
+  display:inline-block;margin-top:8px;padding:9px 18px;border-radius:8px;
+  background:var(--dash-azul,#0033A0);color:#fff;text-decoration:none;
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;
+  transition:opacity .15s;width:100%;text-align:center;
+}
+.btn-inicio:hover{opacity:.85}
+
+/* ── FOOTER ── */
+.hub-footer{
+  text-align:center;padding:20px;
+  font-size:11px;color:#aaa;
+}
+
+@media(max-width:700px){
+  .hub-hero-visual{display:none}
+  .hub-hero-content{padding:32px 24px}
+  .hub-header{padding:0 16px}
+  .dash-grid{padding:16px;gap:12px}
+  .hub-statusbar{padding:8px 16px}
+}
+</style>
 </head>
 <body>
-<div class="bg-glow" aria-hidden="true"></div>
 
-<header>
-  <div class="brand">
-    <img class="logo-spin" src="spin-logo.svg" alt="SPIN">
-    <div>
-      <h1>Dashboards Ats</h1>
-      <div class="sub">Centro de Dashboards</div>
+<!-- ── HEADER ── -->
+<header class="hub-header">
+  <div class="hub-header-left">
+    <div class="hub-logo-box">
+      <img src="spin-logo.svg" alt="SPIN">
     </div>
+    <div>
+      <div class="hub-brand-title">Dashboards Ats</div>
+      <div class="hub-brand-sub">Plaza Oaxaca · 10VHT</div>
+    </div>
+  </div>
+  <div class="hub-header-right">
+    <span class="hub-clock" id="hubClock"></span>
   </div>
 </header>
 
-<div class="card hero">
-  <div class="hero-eyebrow">Spin by OXXO · Plaza Oaxaca</div>
-  <h2 class="hero-title">Centro de Dashboards</h2>
-  <p class="hero-desc">Desde aquí puedes consultar los diferentes tableros de seguimiento Spin, actualizados en vivo desde Google Sheets. Elige un dashboard para ver el detalle.</p>
+<!-- ── HERO ── -->
+<section class="hub-hero">
+
+  <!-- Brush stroke overlay (SVG) -->
+  <svg class="hub-hero-brush" viewBox="0 0 1400 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M820,0 Q1060,60 1400,20 L1400,320 Q1100,290 780,320 Q520,340 260,300 Q500,190 820,0Z" fill="rgba(255,255,255,.07)"/>
+    <path d="M940,0 Q1180,40 1400,10 L1400,180 Q1160,170 940,220 Q740,255 540,240 Q680,140 940,0Z" fill="rgba(255,255,255,.055)"/>
+    <path d="M1100,0 Q1280,20 1400,0 L1400,100 Q1260,90 1100,130 Q960,155 860,145 Q960,80 1100,0Z" fill="rgba(255,255,255,.045)"/>
+  </svg>
+
+  <!-- Left: text content -->
+  <div class="hub-hero-content">
+    <div class="hub-badge">
+      <span class="hub-badge-dot"></span>
+      Sistema activo
+    </div>
+    <h1 class="hub-hero-title">
+      Dashboards
+      <span class="accent">Ats</span>
+    </h1>
+    <p class="hub-hero-desc">
+      Monitoreo en tiempo real de indicadores clave.<br>
+      Datos actualizados directamente desde Google Sheets.
+    </p>
+    <div class="hub-stats">
+      <div class="hub-stat">
+        <span class="hub-stat-n">5</span>
+        <span class="hub-stat-l">Dashboards</span>
+      </div>
+      <div class="hub-stat">
+        <span class="hub-stat-n">253</span>
+        <span class="hub-stat-l">Tiendas</span>
+      </div>
+      <div class="hub-stat">
+        <span class="hub-stat-n">11</span>
+        <span class="hub-stat-l">Asesores</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: mascot image — reemplaza spin-logo.svg con tu imagen de mascota -->
+  <div class="hub-hero-visual">
+    <!-- Anillos decorativos -->
+    <svg class="hub-rings" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="150" cy="150" r="130" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="32"/>
+      <circle cx="150" cy="150" r="90" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="22"/>
+      <circle cx="150" cy="150" r="55" fill="rgba(255,255,255,.05)" stroke="none"/>
+    </svg>
+    <div class="hub-mascot-placeholder">
+      <!-- Para poner mascota: <img class="hub-mascot" src="mascota.png" alt=""> -->
+      <img class="hub-spin-big" src="spin-logo.svg" alt="SPIN">
+    </div>
+  </div>
+
+</section>
+
+<!-- ── STATUS BAR ── -->
+<div class="hub-statusbar">
+  <div class="hub-status-live">
+    <span class="hub-status-dot"></span>
+    <span>Datos conectados a Google Sheets</span>
+  </div>
+  <span id="hubLastCheck">Última verificación: —</span>
 </div>
 
+<!-- ── DASHBOARD CARDS ── -->
 <div class="dash-grid">
-  <div class="card mini dash-card" style="--dash-azul:#0033A0;--dash-azul2:#00C2D1">
-    <span class="dash-status live">Disponible</span>
+
+  <div class="dash-card" style="--dash-azul:#0033A0">
+    <span class="dash-status">● Disponible</span>
     <div class="dash-name">Cuentas Nuevas</div>
     <p class="dash-desc">Avance vs meta de cuentas nuevas por asesor y por tienda.</p>
     <a class="btn-inicio" href="cuentas-nuevas.html">Ver dashboard</a>
   </div>
 
-  <div class="card mini dash-card" style="--dash-azul:#0E7490;--dash-azul2:#22D3EE">
-    <span class="dash-status live">Disponible</span>
+  <div class="dash-card" style="--dash-azul:#0E7490">
+    <span class="dash-status">● Disponible</span>
     <div class="dash-name">Spin Premia</div>
     <p class="dash-desc">Tráfico, Servicios / Telefonía y Afiliaciones por asesor.</p>
     <a class="btn-inicio" href="spin-premia.html">Ver dashboard</a>
   </div>
 
-  <div class="card mini dash-card" style="--dash-azul:#B45309;--dash-azul2:#FB923C">
-    <span class="dash-status live">Disponible</span>
+  <div class="dash-card" style="--dash-azul:#B45309">
+    <span class="dash-status">● Disponible</span>
     <div class="dash-name">Gestión Promocional</div>
     <p class="dash-desc">Avance por promoción, asesor y tienda del periodo activo.</p>
     <a class="btn-inicio" href="dashboard3.html">Ver dashboard</a>
   </div>
-  <div class="card mini dash-card" style="--dash-azul:#15803D;--dash-azul2:#4ADE80">
-    <span class="dash-status live">Disponible</span>
-    <div class="dash-name">Venta sugerida</div>
-    <p class="dash-desc">Venta sugerida por asesor y tienda.</p>
+
+  <div class="dash-card" style="--dash-azul:#15803D">
+    <span class="dash-status">● Disponible</span>
+    <div class="dash-name">Venta Sugerida</div>
+    <p class="dash-desc">Avance ponderado de paquetes por asesor y tienda.</p>
     <a class="btn-inicio" href="dashboard4.html">Ver dashboard</a>
   </div>
-  <div class="card mini dash-card" style="--dash-azul:#6D28D9;--dash-azul2:#A78BFA">
-    <span class="dash-status live">Disponible</span>
+
+  <div class="dash-card" style="--dash-azul:#6D28D9">
+    <span class="dash-status">● Disponible</span>
     <div class="dash-name">Cruzada Andatti</div>
-    <p class="dash-desc">Cumplimiento proyectado de unidades Andatti contra meta mensual.</p>
+    <p class="dash-desc">Proyección de unidades Andatti contra meta mensual.</p>
     <a class="btn-inicio" href="dashboard5.html">Ver dashboard</a>
   </div>
+
 </div>
 
-<footer>Datos en vivo desde Google Sheets «Tableros Spin» · Plaza 10VHT Oaxaca.</footer>
+<footer class="hub-footer">Datos en vivo desde Google Sheets · Plaza 10VHT Oaxaca</footer>
 
+<script>
+function updateClock() {
+  const now = new Date();
+  let h = now.getHours(), m = now.getMinutes();
+  const ampm = h >= 12 ? 'p.m.' : 'a.m.';
+  h = h % 12 || 12;
+  const t = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`;
+  document.getElementById('hubClock').textContent = t;
+  document.getElementById('hubLastCheck').textContent = `Última verificación: ${t}`;
+}
+updateClock();
+setInterval(updateClock, 30000);
+</script>
 </body>
 </html>
