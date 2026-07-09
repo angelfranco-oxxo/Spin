@@ -84,11 +84,12 @@ function multiDonutSVG(segments, size = 132) {
   </svg>`;
 }
 
-function bucketsFor(values) {
+function bucketsFor() {
   return [
-    { lbl: 'Cumple meta (100%)', test: v => v >= 100, color: AZUL },
-    { lbl: '70-99%', test: v => v >= 70 && v < 100, color: '#9078C4' },
-    { lbl: '< 70%', test: v => v < 70, color: '#D6331B' },
+    { lbl: '1–49%',  test: v => v > 0 && v < 50,  color: '#D6331B' },
+    { lbl: '50–74%', test: v => v >= 50 && v < 75, color: '#A78BFA' },
+    { lbl: '75–99%', test: v => v >= 75 && v < 100, color: '#7C6FC4' },
+    { lbl: '100%+',  test: v => v >= 100,           color: AZUL },
   ];
 }
 
@@ -136,11 +137,11 @@ function asesoresDeIndicador(ind) {
   const rows = filasDeIndicador(ind);
   const by = {};
   rows.forEach(r => {
-    if (!by[r.asesor]) by[r.asesor] = { asesor: r.asesor, tiendas: 0, real: 0, meta: 0, sumAvance: 0 };
+    if (!by[r.asesor]) by[r.asesor] = { asesor: r.asesor, tiendas: 0, real: 0, actual: 0, udsAnt: 0, meta: 0 };
     const a = by[r.asesor];
-    a.tiendas++; a.real += r.real; a.meta += r.meta; a.sumAvance += r.avance;
+    a.tiendas++; a.real += r.real; a.actual += r.actual; a.udsAnt += r.udsAnt; a.meta += r.meta;
   });
-  return Object.values(by).map(a => ({ ...a, avance: +(a.sumAvance / a.tiendas).toFixed(1) }));
+  return Object.values(by).map(a => ({ ...a, avance: +(a.meta ? a.real / a.meta * 100 : 0).toFixed(1) }));
 }
 
 function rowHTML(d, i, isAsesor) {
@@ -172,29 +173,49 @@ function init() {
 function render() {
   const tiendas = filasDeIndicador(indicador);
   const asesores = asesoresDeIndicador(indicador);
-  const tot = tiendas.reduce((s, t) => ({ real: s.real + t.real, meta: s.meta + t.meta, avance: s.avance + t.avance }),
-    { real: 0, meta: 0, avance: 0 });
+  const tot = tiendas.reduce(
+    (s, t) => ({ real: s.real + t.real, actual: s.actual + t.actual, udsAnt: s.udsAnt + t.udsAnt, meta: s.meta + t.meta }),
+    { real: 0, actual: 0, udsAnt: 0, meta: 0 }
+  );
   const n = tiendas.length || 1;
-  const avgAvance = tot.avance / n;
+  const avancePonderado = tot.meta ? tot.real / tot.meta * 100 : 0;
+  const avanceReal = tot.meta ? tot.actual / tot.meta * 100 : 0;
   const cumplen = tiendas.filter(t => t.avance >= 100).length;
+  const dia = tiendas[0]?.dia || 0, ultDia = tiendas[0]?.ultDia || 30;
+  const crecPct = tot.udsAnt > 0 ? (tot.actual - tot.udsAnt) / tot.udsAnt * 100 : null;
+  const crecColor = crecPct === null ? '#6B6B6B' : crecPct >= 0 ? AZUL : '#D6331B';
+  const crecTxt = crecPct === null ? 'Sin dato previo' : (crecPct >= 0 ? '+' : '') + crecPct.toFixed(1) + '%';
 
   kpisEl.innerHTML = `
     <div class="kpi hero kpi-donut">
       <div>
-        <div class="lbl">${indicador || 'Cruzada Andatti'} - Avance</div>
-        <div class="foot">Promedio de la plaza vs. meta${PERIODO ? ' · ' + PERIODO : ''}</div>
+        <div class="lbl">Proyección al cierre</div>
+        <div class="foot">Ponderado plaza · ${PERIODO || 'Cruzada Andatti'}</div>
       </div>
-      ${donutSVG(avgAvance, 108, `Avance ${indicador}\n${avgAvance.toFixed(1)}% promedio de ${n} tiendas`)}
+      ${donutSVG(avancePonderado, 108, `Proyección ponderada\n${avancePonderado.toFixed(1)}% de ${nf(tot.meta)} meta\n(Avance real a hoy: ${avanceReal.toFixed(1)}%)`)}
     </div>
-    <div class="kpi"><div class="lbl">Proy. uds vs Meta</div><div class="val">${nf(tot.real)}</div><div class="foot">de ${nf(tot.meta)} meta</div></div>
-    <div class="kpi"><div class="lbl">Tiendas en meta</div><div class="val">${cumplen}</div><div class="foot">de ${tiendas.length} tiendas</div></div>
-    <div class="kpi"><div class="lbl">Cobertura</div><div class="val">${asesores.length}<small class="vs"> asesores</small></div><div class="foot">${tiendas.length} tiendas · Plaza Oaxaca</div></div>`;
+    <div class="kpi">
+      <div class="lbl">Unidades acumuladas</div>
+      <div class="val">${nf(tot.actual)}</div>
+      <div class="foot">de ${nf(tot.meta)} meta · día ${dia}/${ultDia}</div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Tiendas en meta proy.</div>
+      <div class="val">${cumplen}<small class="vs"> / ${n}</small></div>
+      <div class="foot">${(cumplen / n * 100).toFixed(1)}% proyectan cumplir</div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Crec. vs mes anterior</div>
+      <div class="val" style="color:${crecColor}">${crecTxt}</div>
+      <div class="foot">${nf(tot.actual)} vs ${nf(tot.udsAnt)} uds ant.</div>
+    </div>`;
 
   const ranked = [...asesores].sort((a, b) => b.avance - a.avance);
-  chartEl.innerHTML = ranked.length ? barChartSVG(ranked, { value: a => a.avance, max: 100, suffix: '%' }) : '<div class="empty">Sin datos para este indicador.</div>';
+  const maxBar = Math.max(100, ...ranked.map(a => a.avance));
+  chartEl.innerHTML = ranked.length ? barChartSVG(ranked, { value: a => a.avance, max: maxBar, suffix: '%' }) : '<div class="empty">Sin datos para este indicador.</div>';
 
   const valores = tiendas.map(t => t.avance);
-  const buckets = bucketsFor(valores).map(b => ({ ...b, count: valores.filter(b.test).length }));
+  const buckets = bucketsFor().map(b => ({ ...b, count: valores.filter(b.test).length }));
   distDonutEl.innerHTML = `${multiDonutSVG(buckets)}
     <div class="legend">${buckets.map(b => `<div class="legend-row"><span class="legend-dot" style="background:${b.color}"></span>${b.lbl}<span class="legend-count" style="color:${b.color}">${b.count}</span></div>`).join('')}</div>`;
   distHintEl.textContent = `Reparto de las ${tiendas.length} tiendas para ${indicador || 'Cruzada Andatti'}.`;

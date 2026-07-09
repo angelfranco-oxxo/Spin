@@ -55,6 +55,9 @@ async function loadDashboard5Data() {
   const iProyUds = findCol(header, ['Proy Uds']);
   const iMetaMensual = findCol(header, ['Meta Total Mensual']);
   const iAvance = findCol(header, ['%Cump (Proy uds vs meta mensual)', '% Cump', '% Cumplimiento']);
+  const iUdsAnt = findCol(header, ['Unidades MAAnt']);
+  const iVtaAct = findCol(header, ['Vta MActual']);
+  const iVtaAnt = findCol(header, ['Vta MAAnt']);
   const iDia = findCol(header, ['DayofMonth']);
   const iUltimoDia = findCol(header, ['Ultimo dia mes']);
 
@@ -77,6 +80,11 @@ async function loadDashboard5Data() {
         indicador: 'Cruzada Andatti',
         real: proy,
         actual: dash5Num(getCell(r, iActualUds)),
+        udsAnt: dash5Num(getCell(r, iUdsAnt)),
+        vtaAct: dash5Num(getCell(r, iVtaAct)),
+        vtaAnt: dash5Num(getCell(r, iVtaAnt)),
+        dia: dash5Num(getCell(r, iDia)),
+        ultDia: dash5Num(getCell(r, iUltimoDia)),
         meta,
         avance: +avance.toFixed(1),
       };
