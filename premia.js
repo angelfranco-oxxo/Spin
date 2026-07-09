@@ -179,6 +179,7 @@ function init() {
   const n = TIENDAS.length;
   const avgAvanceTraf = tot.avanceTraf / n, avgPctServ = tot.pctServ / n;
   const conversion = tot.reg ? tot.afil / tot.reg * 100 : 0;
+  const cumplenTraf = TIENDAS.filter(t => t.avanceTrafico >= 100).length; // el promedio (103%) esconde que menos de la mitad llega
 
   kpisEl.innerHTML = `
     <div class="kpi hero kpi-donut">
@@ -201,9 +202,9 @@ function init() {
       <div class="foot">% TX Premia promedio de la plaza</div>
     </div>
     <div class="kpi">
-      <div class="lbl">Cobertura</div>
-      <div class="val">${ASESORES.length}<small class="vs"> asesores</small></div>
-      <div class="foot">${n} tiendas · Plaza Oaxaca</div>
+      <div class="lbl">Tiendas que cumplen meta Tráfico</div>
+      <div class="val">${cumplenTraf}<small class="vs"> / ${n}</small></div>
+      <div class="foot">${(cumplenTraf / n * 100).toFixed(0)}% — el promedio (103%) esconde que menos de la mitad llega</div>
     </div>`;
   document.querySelectorAll('.mtab').forEach(tb => tb.addEventListener('click', () => {
     if (tb.dataset.m === metrica) return;
