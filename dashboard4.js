@@ -85,10 +85,13 @@ function multiDonutSVG(segments, size = 132) {
 }
 
 function bucketsFor(values) {
+  // Solo 9/254 tiendas en 1-49%; la mayoría está en 50-99%.
+  // Se afina en 4 tramos para que la distribución no aplaste todo en "<70%".
   return [
-    { lbl: 'Cumple meta (100%)', test: v => v >= 100, color: AZUL },
-    { lbl: '70-99%', test: v => v >= 70 && v < 100, color: '#5CAF7C' },
-    { lbl: '< 70%', test: v => v < 70, color: '#D6331B' },
+    { lbl: '1–49%',  test: v => v > 0 && v < 50,   color: '#D6331B' },
+    { lbl: '50–74%', test: v => v >= 50 && v < 75,  color: '#A0C4AE' },
+    { lbl: '75–99%', test: v => v >= 75 && v < 100, color: '#5CAF7C' },
+    { lbl: '100%+',  test: v => v >= 100,             color: AZUL },
   ];
 }
 
@@ -175,20 +178,51 @@ function render() {
   const tot = tiendas.reduce((s, t) => ({ real: s.real + t.real, meta: s.meta + t.meta, avance: s.avance + t.avance }),
     { real: 0, meta: 0, avance: 0 });
   const n = tiendas.length || 1;
-  const avgAvance = tot.avance / n;
+  // Acumulado ponderado (real/meta), no promedio simple de % por tienda.
+  const avancePonderado = tot.meta ? tot.real / tot.meta * 100 : 0;
   const cumplen = tiendas.filter(t => t.avance >= 100).length;
+  const faltante = Math.max(0, tot.meta - tot.real);
+
+  // Tendencia semanal: suma S1-S5 de todas las tiendas → sparkline de 5 puntos.
+  const semanas = ['S1','S2','S3','S4','S5'];
+  const semSums = semanas.map(s => tiendas.reduce((a, t) => a + (t[s.toLowerCase()] || 0), 0));
+  const semMax = Math.max(...semSums) || 1;
+  const sparkW = 180, sparkH = 42, sparkPad = 6;
+  const pts = semSums.map((v, i) => {
+    const x = sparkPad + (i / (semSums.length - 1)) * (sparkW - sparkPad * 2);
+    const y = sparkH - sparkPad - (v / semMax) * (sparkH - sparkPad * 2);
+    return { x, y, v };
+  });
+  const polyline = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const sparkSVG = `<svg viewBox="0 0 ${sparkW} ${sparkH}" width="${sparkW}" height="${sparkH}" style="display:block;margin-top:10px">
+    <polyline points="${polyline}" fill="none" stroke="${AZUL}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${pts.map((p, i) => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="${AZUL}" data-tip="S${i+1}: ${nf(p.v)} paquetes"/>`).join('')}
+    ${semanas.map((s, i) => `<text x="${pts[i].x.toFixed(1)}" y="${sparkH}" text-anchor="middle" font-family="${FONT}" font-size="10" fill="#6B6B6B">${s}</text>`).join('')}
+  </svg>`;
 
   kpisEl.innerHTML = `
     <div class="kpi hero kpi-donut">
       <div>
-        <div class="lbl">${indicador || 'Dashboard 4'} - Avance</div>
-        <div class="foot">Promedio de la plaza vs. meta${PERIODO ? ' · ' + PERIODO : ''}</div>
+        <div class="lbl">Venta Sugerida — Avance${PERIODO ? ' · ' + PERIODO : ''}</div>
+        <div class="foot">Acumulado ponderado (paquetes / meta)</div>
       </div>
-      ${donutSVG(avgAvance, 108, `Avance ${indicador}\n${avgAvance.toFixed(1)}% promedio de ${n} tiendas`)}
+      ${donutSVG(avancePonderado, 108, `Avance ponderado\n${avancePonderado.toFixed(1)}% · ${nf(tot.real)} de ${nf(tot.meta)} paquetes`)}
     </div>
-    <div class="kpi"><div class="lbl">Resultado vs Meta</div><div class="val">${nf(tot.real)}</div><div class="foot">de ${nf(tot.meta)} meta</div></div>
-    <div class="kpi"><div class="lbl">Tiendas en meta</div><div class="val">${cumplen}</div><div class="foot">de ${tiendas.length} tiendas</div></div>
-    <div class="kpi"><div class="lbl">Cobertura</div><div class="val">${asesores.length}<small class="vs"> asesores</small></div><div class="foot">${tiendas.length} tiendas · Plaza Oaxaca</div></div>`;
+    <div class="kpi">
+      <div class="lbl">Tendencia semanal</div>
+      <div class="foot" style="margin-top:2px">Paquetes vendidos por semana (plaza)</div>
+      ${sparkSVG}
+    </div>
+    <div class="kpi">
+      <div class="lbl">Tiendas en meta</div>
+      <div class="val">${cumplen}<small class="vs"> / ${n}</small></div>
+      <div class="foot">${(cumplen / n * 100).toFixed(0)}% de las tiendas</div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Paquetes faltantes</div>
+      <div class="val">${nf(faltante)}</div>
+      <div class="foot">para cumplir la meta total de la plaza</div>
+    </div>`;
 
   const ranked = [...asesores].sort((a, b) => b.avance - a.avance);
   chartEl.innerHTML = ranked.length ? barChartSVG(ranked, { value: a => a.avance, max: 100, suffix: '%' }) : '<div class="empty">Sin datos para este indicador.</div>';

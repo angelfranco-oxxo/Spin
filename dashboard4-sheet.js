@@ -58,6 +58,8 @@ async function loadDashboard4Data() {
   const iMeta = findCol(header, ['Meta', 'Objetivo', 'META PAQUETES VS']);
   const iAvance = findCol(header, ['% Avance', '% AVANCE', 'Avance %', '% Cumplimiento', '% AVANCE PERIODO']);
   const iPeriodo = findCol(header, ['Periodo', 'Gestion Periodo', 'Gestión Periodo']);
+  const iS1 = findCol(header, ['S1']), iS2 = findCol(header, ['S2']), iS3 = findCol(header, ['S3']);
+  const iS4 = findCol(header, ['S4']), iS5 = findCol(header, ['S5']);
   const iSemana = findCol(header, ['Semana']);
 
   if (iAsesor < 0 || iCrTienda < 0) throw new Error('Faltan columnas de asesor o tienda en Dashboard4');
@@ -80,6 +82,8 @@ async function loadDashboard4Data() {
         real,
         meta,
         avance: +avance.toFixed(1),
+        s1: dash4Num(getCell(r, iS1)), s2: dash4Num(getCell(r, iS2)), s3: dash4Num(getCell(r, iS3)),
+        s4: dash4Num(getCell(r, iS4)), s5: dash4Num(getCell(r, iS5)),
       };
     });
 
