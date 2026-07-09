@@ -95,6 +95,20 @@ body { background: #F2F1EF; max-width: none; padding: 0; }
 
 /* Grid y footer */
 .dash-grid{padding:24px 28px;max-width:1400px;margin:0 auto}
+
+/* Métrica en vivo dentro de cada card */
+.dash-metric{width:100%;margin:2px 0 6px}
+.dash-metric-val{
+  font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;
+  line-height:1;color:var(--dash-azul,var(--azul));font-variant-numeric:tabular-nums;
+}
+.dash-metric-bar{height:5px;border-radius:99px;background:rgba(10,10,10,.08);margin-top:8px;overflow:hidden}
+.dash-metric-bar i{
+  display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--dash-azul2,var(--azul2)),var(--dash-azul,var(--azul)));
+  transition:width .8s cubic-bezier(.2,.8,.2,1);
+}
+.dash-metric-sub{font-size:11px;color:var(--gris,#6B6B6B);margin-top:6px}
 .hub-footer{text-align:center;padding:20px;font-size:11px;color:#aaa}
 
 @media(max-width:700px){
@@ -171,6 +185,11 @@ body { background: #F2F1EF; max-width: none; padding: 0; }
     <span class="dash-status live">Disponible</span>
     <div class="dash-name">Cuentas Nuevas</div>
     <p class="dash-desc">Avance vs meta de cuentas nuevas por asesor y por tienda.</p>
+    <div class="dash-metric" id="rd1">
+      <div class="dash-metric-val">…</div>
+      <div class="dash-metric-bar"><i></i></div>
+      <div class="dash-metric-sub">cargando…</div>
+    </div>
     <a class="btn-inicio" href="cuentas-nuevas.html">Ver dashboard →</a>
   </div>
 
@@ -178,6 +197,11 @@ body { background: #F2F1EF; max-width: none; padding: 0; }
     <span class="dash-status live">Disponible</span>
     <div class="dash-name">Spin Premia</div>
     <p class="dash-desc">Tráfico, Servicios / Telefonía y Afiliaciones por asesor.</p>
+    <div class="dash-metric" id="rd2">
+      <div class="dash-metric-val">…</div>
+      <div class="dash-metric-bar"><i></i></div>
+      <div class="dash-metric-sub">cargando…</div>
+    </div>
     <a class="btn-inicio" href="spin-premia.html">Ver dashboard →</a>
   </div>
 
@@ -185,6 +209,11 @@ body { background: #F2F1EF; max-width: none; padding: 0; }
     <span class="dash-status live">Disponible</span>
     <div class="dash-name">Gestión Promocional</div>
     <p class="dash-desc">Avance por promoción, asesor y tienda del periodo activo.</p>
+    <div class="dash-metric" id="rd3">
+      <div class="dash-metric-val">…</div>
+      <div class="dash-metric-bar"><i></i></div>
+      <div class="dash-metric-sub">cargando…</div>
+    </div>
     <a class="btn-inicio" href="dashboard3.html">Ver dashboard →</a>
   </div>
 
@@ -192,6 +221,11 @@ body { background: #F2F1EF; max-width: none; padding: 0; }
     <span class="dash-status live">Disponible</span>
     <div class="dash-name">Venta Sugerida</div>
     <p class="dash-desc">Avance ponderado de paquetes por asesor y tienda.</p>
+    <div class="dash-metric" id="rd4">
+      <div class="dash-metric-val">…</div>
+      <div class="dash-metric-bar"><i></i></div>
+      <div class="dash-metric-sub">cargando…</div>
+    </div>
     <a class="btn-inicio" href="dashboard4.html">Ver dashboard →</a>
   </div>
 
@@ -199,6 +233,11 @@ body { background: #F2F1EF; max-width: none; padding: 0; }
     <span class="dash-status live">Disponible</span>
     <div class="dash-name">Cruzada Andatti</div>
     <p class="dash-desc">Proyección de unidades Andatti contra meta mensual.</p>
+    <div class="dash-metric" id="rd5">
+      <div class="dash-metric-val">…</div>
+      <div class="dash-metric-bar"><i></i></div>
+      <div class="dash-metric-sub">cargando…</div>
+    </div>
     <a class="btn-inicio" href="dashboard5.html">Ver dashboard →</a>
   </div>
 </div>
@@ -218,5 +257,6 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 30000);
 </script>
+<script src="hub-resumen.js"></script>
 </body>
 </html>
