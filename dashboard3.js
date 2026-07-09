@@ -91,10 +91,13 @@ function multiDonutSVG(segments, size = 132) {
 
 // % Avance Periodo ya viene topado 0-100% desde el Sheet, igual que avanceTrafico en Premia.
 function bucketsFor(values) {
+  // Distribución real: 0 tiendas en 0% (todas vendieron algo), 94/754 en 100%+.
+  // Se ajusta a 4 tramos que reflejan la distribución real sin inventar rangos vacíos.
   return [
-    { lbl: 'Cumple meta (100%)', test: v => v >= 100, color: AZUL },
-    { lbl: '70–99%', test: v => v >= 70 && v < 100, color: '#D98A4E' },
-    { lbl: '< 70%', test: v => v < 70, color: '#D6331B' },
+    { lbl: '1–49%',    test: v => v > 0 && v < 50,    color: '#D6331B' },
+    { lbl: '50–74%',   test: v => v >= 50 && v < 75,  color: '#D98A4E' },
+    { lbl: '75–99%',   test: v => v >= 75 && v < 100, color: '#FBD9AE' },
+    { lbl: '100%+',    test: v => v >= 100,             color: AZUL },
   ];
 }
 
@@ -178,31 +181,33 @@ function render() {
   const tot = tiendas.reduce((s, t) => ({ uds: s.uds + t.uds, meta: s.meta + t.meta, avance: s.avance + t.avance }),
     { uds: 0, meta: 0, avance: 0 });
   const n = tiendas.length || 1;
-  const avgAvance = tot.avance / n;
+  // Avance ponderado (uds/meta) en vez del promedio simple de % por tienda.
+  const avancePonderado = tot.meta ? tot.uds / tot.meta * 100 : 0;
   const cumplen = tiendas.filter(t => t.avance >= 100).length;
+  const faltante = Math.max(0, tot.meta - tot.uds);
 
   kpisEl.innerHTML = `
     <div class="kpi hero kpi-donut">
       <div>
         <div class="lbl">${promo} — Avance</div>
-        <div class="foot">Promedio de la plaza vs. meta del periodo${PERIODO ? ' · ' + PERIODO : ''}</div>
+        <div class="foot">Acumulado ponderado (uds/meta)${PERIODO ? ' · ' + PERIODO : ''}</div>
       </div>
-      ${donutSVG(avgAvance, 108, `Avance ${promo}\n${avgAvance.toFixed(1)}% promedio de ${n} tiendas`)}
+      ${donutSVG(avancePonderado, 108, `Avance ${promo}\n${avancePonderado.toFixed(1)}% · ${nf(tot.uds)} de ${nf(tot.meta)} uds`)}
     </div>
     <div class="kpi">
-      <div class="lbl">Unidades vs Meta</div>
+      <div class="lbl">Unidades vendidas</div>
       <div class="val">${nf(tot.uds)}</div>
       <div class="foot">de ${nf(tot.meta)} unidades meta</div>
     </div>
     <div class="kpi">
       <div class="lbl">Tiendas en meta</div>
       <div class="val">${cumplen}</div>
-      <div class="foot">de ${tiendas.length} tiendas</div>
+      <div class="foot">de ${tiendas.length} tiendas (${(cumplen / n * 100).toFixed(0)}%)</div>
     </div>
     <div class="kpi">
-      <div class="lbl">Cobertura</div>
-      <div class="val">${asesores.length}<small class="vs"> asesores</small></div>
-      <div class="foot">${tiendas.length} tiendas · Plaza Oaxaca</div>
+      <div class="lbl">Unidades faltantes</div>
+      <div class="val">${nf(faltante)}</div>
+      <div class="foot">para cumplir la meta total de esta promoción</div>
     </div>`;
 
   const ranked = [...asesores].sort((a, b) => b.avance - a.avance);
