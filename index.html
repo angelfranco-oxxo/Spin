@@ -109,6 +109,15 @@ body { background: #F2F1EF; max-width: none; padding: 0; }
   transition:width .8s cubic-bezier(.2,.8,.2,1);
 }
 .dash-metric-sub{font-size:11px;color:var(--gris,#6B6B6B);margin-top:6px}
+
+/* Gráficas del resumen */
+.hub-charts{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  padding:0 28px;max-width:1400px;margin:0 auto;
+}
+.hub-charts .card.mini{margin-bottom:0}
+.hub-chart-empty{font-size:12px;color:#999;padding:24px 0}
+@media(max-width:1080px){.hub-charts{grid-template-columns:1fr}}
 .hub-footer{text-align:center;padding:20px;font-size:11px;color:#aaa}
 
 @media(max-width:700px){
@@ -239,6 +248,22 @@ body { background: #F2F1EF; max-width: none; padding: 0; }
       <div class="dash-metric-sub">cargando…</div>
     </div>
     <a class="btn-inicio" href="dashboard5.html">Ver dashboard →</a>
+  </div>
+</div>
+
+<!-- ── GRÁFICAS DEL RESUMEN ── -->
+<div class="hub-charts">
+  <div class="card mini">
+    <h2>Avance ponderado por tablero</h2>
+    <div id="chartAvance"><div class="hub-chart-empty">Cargando…</div></div>
+  </div>
+  <div class="card mini">
+    <h2>Tendencia semanal · Venta Sugerida</h2>
+    <div id="chartSemanal"><div class="hub-chart-empty">Cargando…</div></div>
+  </div>
+  <div class="card mini">
+    <h2>Cruzada Andatti · unidades vs meta</h2>
+    <div id="chartAndatti"><div class="hub-chart-empty">Cargando…</div></div>
   </div>
 </div>
 
